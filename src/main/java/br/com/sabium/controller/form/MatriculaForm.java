@@ -1,10 +1,14 @@
 package br.com.sabium.controller.form;
 
+import java.util.List;
+import java.util.Optional;
+
 import javax.management.RuntimeErrorException;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import br.com.sabium.controller.exception.DisciplinaNotExistException;
+import br.com.sabium.controller.exception.EstudanteAlreadyMatriculadoOnDisciplinaException;
 import br.com.sabium.controller.exception.EstudanteNotExistException;
 import br.com.sabium.model.administrativo.Disciplina;
 import br.com.sabium.model.administrativo.Matricula;
@@ -17,34 +21,41 @@ public class MatriculaForm {
 
 	@NotNull
 	@NotEmpty
-	private String nomeEstudante;
+	private String idEstudante;
 
 	@NotNull
 	@NotEmpty
-	private String nomeDisciplina;
+	private String idDisciplina;
 
-	public String getNomeEstudante() {
-		return nomeEstudante;
+	public String getIdEstudante() {
+		return idEstudante;
 	}
 
-	public void setNomeEstudante(String nomeEstudante) {
-		this.nomeEstudante = nomeEstudante;
+	public void setIdEstudante(String idEstudante) {
+		this.idEstudante = idEstudante;
 	}
 
-	public String getNomeDisciplina() {
-		return nomeDisciplina;
+	public String getIdDisciplina() {
+		return idDisciplina;
 	}
 
-	public void setNomeDisciplina(String nomeDisciplina) {
-		this.nomeDisciplina = nomeDisciplina;
+	public void setIdDisciplina(String idDisciplina) {
+		this.idDisciplina = idDisciplina;
 	}
 
-	public Matricula converter(DisciplinaRepository disciplinaRepository, EstudanteRepository estudanteRepository) {
-		Disciplina disciplina = disciplinaRepository.findByNome(nomeDisciplina);
+	public Matricula converter(DisciplinaRepository disciplinaRepository, EstudanteRepository estudanteRepository,
+			 MatriculaRepository matriculaRepository) {
+		Optional<Disciplina> disciplina = disciplinaRepository.findById(Long.parseLong(idDisciplina));
 		if (disciplina != null) {
-			Estudante estudante = estudanteRepository.findByNome(nomeEstudante);
+			Optional<Estudante> estudante = estudanteRepository.findById(Long.parseLong(idEstudante));
 			if (estudante != null) {
-				return new Matricula(estudante, disciplina);
+				List<Optional<Matricula>> matriculas = matriculaRepository.findByEstudanteId(estudante.get().getId());
+				for (Optional<Matricula> m : matriculas) {
+					if(m.get().getDisciplina() == disciplina.get()) {
+						throw new EstudanteAlreadyMatriculadoOnDisciplinaException();
+					}
+				}				
+				return new Matricula(estudante.get(), disciplina.get());
 			}
 			throw new EstudanteNotExistException();
 		}

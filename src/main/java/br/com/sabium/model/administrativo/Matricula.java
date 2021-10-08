@@ -1,36 +1,40 @@
 package br.com.sabium.model.administrativo;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.MapsId;
+import javax.persistence.SequenceGenerator;
 
 import br.com.sabium.model.pessoa.Estudante;
 
 @Entity
 public class Matricula {
 
-	//@EmbeddedId
-	//private MatriculaKey id;
-	
 	@Id
-	@GeneratedValue (strategy =  GenerationType.IDENTITY)
+	//@GeneratedValue(strategy = GenerationType.IDENTITY)
+	
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "matricula_generator")
+	@SequenceGenerator(name="matricula_generator", sequenceName = "matricula_sequence", allocationSize=50)
 	private Long id;
 
-	@ManyToOne
-	//@MapsId("estudanteId")
-	@JoinColumn(name = "estudante_id")
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "estudante_id", nullable = false)
 	private Estudante estudante;
 
-	@ManyToOne
-	//@MapsId("disciplinaId")
-	@JoinColumn(name = "disciplina_id")
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "disciplina_id", nullable = false)
 	private Disciplina disciplina;
 
+	public Matricula() {
+
+	}
+
 	public Matricula(Estudante estudante, Disciplina disciplina) {
+		this();
 		this.estudante = estudante;
 		this.disciplina = disciplina;
 	}

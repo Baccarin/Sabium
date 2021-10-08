@@ -51,12 +51,12 @@ public class DisciplinaForm {
 	}
 	
 	public Disciplina converter(DisciplinaRepository disciplinaRepository, CursoRepository cursoRepository) {
-		Disciplina disciplina = disciplinaRepository.findByNome(nome);
-		if (disciplina != null) {
-			throw new DisciplinaAlreadyExistsException();
-		}
 		Curso curso = cursoRepository.findByNome(nomeCurso);
 		if (curso != null) {
+			Disciplina disciplina = disciplinaRepository.findByNome(nome);
+			if (disciplina.getCurso() == curso) {
+				throw new DisciplinaAlreadyExistsException();
+			}
 			return new Disciplina(nome, Integer.parseInt(duracao), curso);
 		}
 		throw new DisciplinaWithOutCursoException();

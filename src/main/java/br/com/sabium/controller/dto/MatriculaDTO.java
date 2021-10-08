@@ -7,11 +7,13 @@ import br.com.sabium.model.administrativo.Matricula;
 
 public class MatriculaDTO {
 
+	private Long id;
 	private String nomeEstudante;
 	private String nomeDisciplina;
 
 	public MatriculaDTO(Matricula matricula) {
-		this.nomeDisciplina = matricula.getEstudante().getNome();
+		this.id = matricula.getId();
+		this.nomeEstudante = matricula.getEstudante().getNome();
 		this.nomeDisciplina = matricula.getDisciplina().getNome();
 	}
 
@@ -34,6 +36,14 @@ public class MatriculaDTO {
 
 	public void setNomeDisciplina(String nomeDisciplina) {
 		this.nomeDisciplina = nomeDisciplina;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public static List<MatriculaDTO> converter(List<Matricula> matriculas) {

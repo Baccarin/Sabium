@@ -2,7 +2,9 @@ package br.com.sabium.model.pessoa;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 
 import br.com.sabium.model.administrativo.Matricula;
@@ -10,10 +12,11 @@ import br.com.sabium.model.administrativo.Turno;
 
 @Entity
 public class Estudante extends Pessoa {
+
+	private Turno turno;
     
-    private Turno turno;
-    
-    @OneToMany(mappedBy = "estudante")
+    @OneToMany(mappedBy = "estudante", fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
     private List<Matricula> matriculas;
 
     public Estudante() {

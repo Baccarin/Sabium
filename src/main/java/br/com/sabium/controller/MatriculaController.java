@@ -52,8 +52,9 @@ public class MatriculaController {
 
 	@PostMapping
 	@Transactional
-	public ResponseEntity<MatriculaDTO> cadastrar(@RequestBody @Valid MatriculaForm form, UriComponentsBuilder uriBuilder) {
-		Matricula matricula = form.converter(disciplinaRepository, estudanteRepository);
+	public ResponseEntity<MatriculaDTO> cadastrar(@RequestBody @Valid MatriculaForm form,
+			UriComponentsBuilder uriBuilder) {
+		Matricula matricula = form.converter(disciplinaRepository, estudanteRepository, matriculaRepository);
 		matriculaRepository.save(matricula);
 
 		URI uri = uriBuilder.path("/matriculas/{id}").buildAndExpand(matricula.getId()).toUri();

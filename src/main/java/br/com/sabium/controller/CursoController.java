@@ -45,7 +45,8 @@ public class CursoController {
 	
 	@PostMapping
 	@Transactional
-	public ResponseEntity<CursoDTO> cadastrar(@RequestBody @Valid CursoForm form, UriComponentsBuilder uriBuilder) {
+	public ResponseEntity<CursoDTO> cadastrar(@RequestBody @Valid CursoForm form,
+			UriComponentsBuilder uriBuilder) {
 		Curso curso = form.converter(cursoRepository);
 		cursoRepository.save(curso);
 		

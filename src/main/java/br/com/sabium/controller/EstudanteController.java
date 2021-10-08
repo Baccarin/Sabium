@@ -20,13 +20,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import br.com.sabium.controller.dto.DisciplinaDTO;
 import br.com.sabium.controller.dto.EstudanteDTO;
-import br.com.sabium.controller.dto.MatriculaDTO;
+import br.com.sabium.controller.dto.EstudanteDisciplinaDTO;
 import br.com.sabium.controller.form.EstudanteForm;
+import br.com.sabium.model.administrativo.Disciplina;
 import br.com.sabium.model.administrativo.Matricula;
 import br.com.sabium.model.pessoa.Estudante;
+import br.com.sabium.repository.DisciplinaRepository;
 import br.com.sabium.repository.EstudanteRepository;
-import br.com.sabium.repository.MatriculaRepository;
 
 @RestController
 @RequestMapping("/estudantes")
@@ -36,7 +38,7 @@ public class EstudanteController {
 	private EstudanteRepository estudanteRepository;
 
 	@Autowired
-	private MatriculaRepository matriculaRepository;
+	private DisciplinaRepository disciplinaRepository;
 
 	@GetMapping
 	public List<EstudanteDTO> lista(String nomePessoa) {
@@ -61,19 +63,17 @@ public class EstudanteController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<EstudanteDTO> detalhar(@PathVariable Long id) {
+	public ResponseEntity<EstudanteDTO> detalhesDisciplinasMatriculadas(@PathVariable Long id) {
 		Optional<Estudante> estudante = estudanteRepository.findById(id);
 		if (estudante != null) {
-			EstudanteDTO estudanteDTO = new EstudanteDTO(estudante.get());
-			List<Optional<Matricula>> matriculasOptional = matriculaRepository
-					.findByEstudanteId(estudante.get().getId());
-			if (!matriculasOptional.isEmpty()) {
-				List<Matricula> matriculas = new ArrayList<Matricula>();
-				matriculasOptional.forEach(mo -> matriculas.add(mo.get()));
-				List<MatriculaDTO> dtos = MatriculaDTO.converter(matriculas);
-				estudanteDTO.setMatriculas(dtos);
+			EstudanteDisciplinaDTO estudanteDisciplinaDTO = new EstudanteDisciplinaDTO(estudante.get());
+			for (Matricula matricula : estudante.get().getMatriculas()) {
+				List<Disciplina> disciplinas = disciplinaRepository.findByMatricula(matricula.getId());
+				if (disciplinas != null && !disciplinas.isEmpty()) {
+					estudanteDisciplinaDTO.adicionaDisciplinas(DisciplinaDTO.converter(disciplinas));
+				}
 			}
-			return ResponseEntity.ok(estudanteDTO);
+			return ResponseEntity.ok(estudanteDisciplinaDTO);
 		}
 		return ResponseEntity.notFound().build();
 	}

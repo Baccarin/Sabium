@@ -13,7 +13,7 @@ public interface MatriculaRepository extends JpaRepository<Matricula, Long>{
 	
 	Matricula findByDisciplinaNome(String nome);
 	
-	List<Optional<Matricula>> findByEstudanteId(Long estudanteId);
+	List<Matricula> findByEstudanteId(Long estudanteId);
 	
 	List<Matricula> findByDisciplinaId(Long disciplinaId);
 	

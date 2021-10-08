@@ -88,4 +88,10 @@ public class Disciplina{
 		this.matriculas = matriculas;
 	}
 
+	@Override
+	public String toString() {
+		return "Disciplina [id=" + id + ", nome=" + nome + ", duracao=" + duracao + ", matriculas=" + matriculas
+				+ ", curso=" + curso + "]";
+	}
+
 }

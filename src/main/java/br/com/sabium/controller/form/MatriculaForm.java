@@ -3,7 +3,6 @@ package br.com.sabium.controller.form;
 import java.util.List;
 import java.util.Optional;
 
-import javax.management.RuntimeErrorException;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -44,26 +43,22 @@ public class MatriculaForm {
 	}
 
 	public Matricula converter(DisciplinaRepository disciplinaRepository, EstudanteRepository estudanteRepository,
-			 MatriculaRepository matriculaRepository) {
+			MatriculaRepository matriculaRepository) {
 		Optional<Disciplina> disciplina = disciplinaRepository.findById(Long.parseLong(idDisciplina));
 		if (disciplina != null) {
 			Optional<Estudante> estudante = estudanteRepository.findById(Long.parseLong(idEstudante));
 			if (estudante != null) {
-				List<Optional<Matricula>> matriculas = matriculaRepository.findByEstudanteId(estudante.get().getId());
-				for (Optional<Matricula> m : matriculas) {
-					if(m.get().getDisciplina() == disciplina.get()) {
+				List<Matricula> matriculas = matriculaRepository.findByEstudanteId(estudante.get().getId());
+				for (Matricula m : matriculas) {
+					if (m.getDisciplina() == disciplina.get()) {
 						throw new EstudanteAlreadyMatriculadoOnDisciplinaException();
 					}
-				}				
+				}
 				return new Matricula(estudante.get(), disciplina.get());
 			}
 			throw new EstudanteNotExistException();
 		}
 		throw new DisciplinaNotExistException();
-	}
-
-	public Matricula atualizar(Long id, MatriculaRepository matriculaRepository) {
-		throw new RuntimeErrorException(null, "Impossível atualizar uma matrícula");
 	}
 
 }

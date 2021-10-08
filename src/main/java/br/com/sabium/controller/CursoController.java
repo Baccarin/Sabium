@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import br.com.sabium.controller.dto.CursoDTO;
+import br.com.sabium.controller.dto.CursoDisciplinaDTO;
 import br.com.sabium.controller.dto.DisciplinaDTO;
 import br.com.sabium.controller.exception.CursoWithDisciplinasAssociateException;
 import br.com.sabium.controller.form.CursoForm;
@@ -61,18 +62,16 @@ public class CursoController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<CursoDTO> detalhar(@PathVariable Long id) {
+	public ResponseEntity<CursoDisciplinaDTO> detalhar(@PathVariable Long id) {
 		Optional<Curso> curso = cursoRepository.findById(id);
 		if (curso != null) {
-			CursoDTO cursoDTO = new CursoDTO(curso.get());
-			List<Disciplina> disciplinasOptional = disciplinaRepository.findByCursoId(curso.get().getId());
-			if (!disciplinasOptional.isEmpty()) {
-				List<Disciplina> disciplinas = new ArrayList<Disciplina>();
-				disciplinasOptional.forEach(d -> disciplinas.add(d));
+			CursoDisciplinaDTO cursoDisciplinaDTO = new CursoDisciplinaDTO(curso.get());
+			List<Disciplina> disciplinas = disciplinaRepository.findByCursoId(curso.get().getId());
+			if (!disciplinas.isEmpty()) {
 				List<DisciplinaDTO> dtos = DisciplinaDTO.converter(disciplinas);
-				cursoDTO.setDisciplinas(dtos);
+				cursoDisciplinaDTO.setDisciplinas(dtos);
 			}
-			return ResponseEntity.ok(cursoDTO);
+			return ResponseEntity.ok(cursoDisciplinaDTO);
 		}
 		return ResponseEntity.notFound().build();
 	}

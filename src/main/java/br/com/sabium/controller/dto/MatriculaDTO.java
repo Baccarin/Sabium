@@ -7,69 +7,38 @@ import br.com.sabium.model.administrativo.Matricula;
 
 public class MatriculaDTO {
 
-	private Long id;
-	private Long idEstudante;
-	private String nomeEstudante;
-	private Long idDisciplina;
-	private String nomeDisciplina;
+	private Long idMatricula;
+	private EstudanteDTO estudante;
+	private DisciplinaDTO disciplina;
 
 	public MatriculaDTO(Matricula matricula) {
-		this.id = matricula.getId();
-		this.nomeEstudante = matricula.getEstudante().getNome();
-		this.idEstudante = matricula.getEstudante().getId();
-		this.nomeDisciplina = matricula.getDisciplina().getNome();
-		this.idDisciplina = matricula.getDisciplina().getId();
+		this.idMatricula = matricula.getId();
+		this.estudante = new EstudanteDTO(matricula.getEstudante());
+		this.disciplina = new DisciplinaDTO(matricula.getDisciplina());
 	}
 
-	public MatriculaDTO(String nomeEstudante, String nomeDisciplina) {
-		this.nomeEstudante = nomeEstudante;
-		this.nomeDisciplina = nomeDisciplina;
-	}
-	
-	public MatriculaDTO(Long id, Long idDisciplina, String nomeDisciplina) {
-		this.id = id;
-		this.idDisciplina = idDisciplina;
-		this.nomeDisciplina = nomeDisciplina;
+	public Long getIdMatricula() {
+		return idMatricula;
 	}
 
-	public String getNomeEstudante() {
-		return nomeEstudante;
+	public void setIdMatricula(Long idMatricula) {
+		this.idMatricula = idMatricula;
 	}
 
-	public void setNomeEstudante(String nomeEstudante) {
-		this.nomeEstudante = nomeEstudante;
+	public EstudanteDTO getEstudante() {
+		return estudante;
 	}
 
-	public String getNomeDisciplina() {
-		return nomeDisciplina;
+	public void setEstudante(EstudanteDTO estudante) {
+		this.estudante = estudante;
 	}
 
-	public void setNomeDisciplina(String nomeDisciplina) {
-		this.nomeDisciplina = nomeDisciplina;
+	public DisciplinaDTO getDisciplina() {
+		return disciplina;
 	}
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Long getIdEstudante() {
-		return idEstudante;
-	}
-
-	public void setIdEstudante(Long idEstudante) {
-		this.idEstudante = idEstudante;
-	}
-
-	public Long getIdDisciplina() {
-		return idDisciplina;
-	}
-
-	public void setIdDisciplina(Long idDisciplina) {
-		this.idDisciplina = idDisciplina;
+	public void setDisciplina(DisciplinaDTO disciplina) {
+		this.disciplina = disciplina;
 	}
 
 	public static List<MatriculaDTO> converter(List<Matricula> matriculas) {

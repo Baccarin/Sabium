@@ -21,10 +21,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import br.com.sabium.controller.dto.DisciplinaDTO;
+import br.com.sabium.controller.dto.MatriculaDTO;
 import br.com.sabium.controller.form.DisciplinaForm;
 import br.com.sabium.model.administrativo.Disciplina;
+import br.com.sabium.model.administrativo.Matricula;
 import br.com.sabium.repository.CursoRepository;
 import br.com.sabium.repository.DisciplinaRepository;
+import br.com.sabium.repository.MatriculaRepository;
 
 @RestController
 @RequestMapping("/disciplinas")
@@ -35,6 +38,9 @@ public class DisciplinaController {
 
 	@Autowired
 	private DisciplinaRepository disciplinaRepository;
+
+	@Autowired
+	private MatriculaRepository matriculaRepository;
 
 	@GetMapping
 	public List<DisciplinaDTO> lista(String nomeDisciplina) {
@@ -62,7 +68,14 @@ public class DisciplinaController {
 	public ResponseEntity<DisciplinaDTO> detalhar(@PathVariable Long id) {
 		Optional<Disciplina> disciplina = disciplinaRepository.findById(id);
 		if (disciplina != null) {
-			return ResponseEntity.ok(new DisciplinaDTO(disciplina.get()));
+			DisciplinaDTO discipliaDTO = new DisciplinaDTO(disciplina.get());
+
+			List<Matricula> matriculas = matriculaRepository.findByDisciplinaId(discipliaDTO.getId());
+			if (!matriculas.isEmpty()) {
+				List<MatriculaDTO> dtos = MatriculaDTO.converter(matriculas);
+				discipliaDTO.setMatriculas(dtos);
+			}
+			return ResponseEntity.ok(discipliaDTO);
 		}
 		return ResponseEntity.notFound().build();
 	}

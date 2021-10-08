@@ -13,10 +13,8 @@ import br.com.sabium.model.pessoa.Estudante;
 
 @Entity
 public class Matricula {
-
-	@Id
-	//@GeneratedValue(strategy = GenerationType.IDENTITY)
 	
+	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "matricula_generator")
 	@SequenceGenerator(name="matricula_generator", sequenceName = "matricula_sequence", allocationSize=50)
 	private Long id;

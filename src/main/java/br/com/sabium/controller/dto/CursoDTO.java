@@ -9,10 +9,16 @@ public class CursoDTO {
 
 	private Long id;
 	private String nome;
+	private List<DisciplinaDTO> disciplinas;
 
 	public CursoDTO(Curso curso) {
 		this.id = curso.getId();
 		this.nome = curso.getNome();
+	}
+
+	public CursoDTO(Curso curso, List<DisciplinaDTO> disciplinas) {
+		this(curso);
+		this.disciplinas = disciplinas;
 	}
 
 	public Long getId() {
@@ -29,6 +35,14 @@ public class CursoDTO {
 
 	public void setNome(String nome) {
 		this.nome = nome;
+	}
+
+	public List<DisciplinaDTO> getDisciplinas() {
+		return disciplinas;
+	}
+
+	public void setDisciplinas(List<DisciplinaDTO> disciplinas) {
+		this.disciplinas = disciplinas;
 	}
 
 	public static List<CursoDTO> converter(List<Curso> cursos) {

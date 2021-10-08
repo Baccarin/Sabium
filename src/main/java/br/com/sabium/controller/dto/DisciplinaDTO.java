@@ -12,6 +12,7 @@ public class DisciplinaDTO {
 	private String nome;
 	private Integer duracao;
 	private String nomeCurso;
+	private List<MatriculaDTO> matriculas;
 
 	public DisciplinaDTO(Disciplina disciplina) {
 		this.id = disciplina.getId();
@@ -22,6 +23,11 @@ public class DisciplinaDTO {
 		}
 		this.nomeCurso = disciplina.getCurso().getNome();
 
+	}
+
+	public DisciplinaDTO(Disciplina disciplina, List<MatriculaDTO> matriculas) {
+		this(disciplina);
+		this.matriculas = matriculas;
 	}
 
 	public Long getId() {
@@ -54,6 +60,14 @@ public class DisciplinaDTO {
 
 	public void setNomeCurso(String nomeCurso) {
 		this.nomeCurso = nomeCurso;
+	}
+
+	public List<MatriculaDTO> getMatriculas() {
+		return matriculas;
+	}
+
+	public void setMatriculas(List<MatriculaDTO> matriculas) {
+		this.matriculas = matriculas;
 	}
 
 	public static List<DisciplinaDTO> converter(List<Disciplina> disciplinas) {

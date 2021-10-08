@@ -21,9 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import br.com.sabium.controller.dto.EstudanteDTO;
+import br.com.sabium.controller.dto.MatriculaDTO;
 import br.com.sabium.controller.form.EstudanteForm;
+import br.com.sabium.model.administrativo.Matricula;
 import br.com.sabium.model.pessoa.Estudante;
 import br.com.sabium.repository.EstudanteRepository;
+import br.com.sabium.repository.MatriculaRepository;
 
 @RestController
 @RequestMapping("/estudantes")
@@ -31,6 +34,9 @@ public class EstudanteController {
 
 	@Autowired
 	private EstudanteRepository estudanteRepository;
+
+	@Autowired
+	private MatriculaRepository matriculaRepository;
 
 	@GetMapping
 	public List<EstudanteDTO> lista(String nomePessoa) {
@@ -45,9 +51,8 @@ public class EstudanteController {
 
 	@PostMapping
 	@Transactional
-	public ResponseEntity<EstudanteDTO> cadastrar(@RequestBody EstudanteForm form,
-			UriComponentsBuilder uriBuilder) {
-		
+	public ResponseEntity<EstudanteDTO> cadastrar(@RequestBody EstudanteForm form, UriComponentsBuilder uriBuilder) {
+
 		Estudante estudante = form.converter(estudanteRepository);
 		estudanteRepository.save(estudante);
 
@@ -59,7 +64,16 @@ public class EstudanteController {
 	public ResponseEntity<EstudanteDTO> detalhar(@PathVariable Long id) {
 		Optional<Estudante> estudante = estudanteRepository.findById(id);
 		if (estudante != null) {
-			return ResponseEntity.ok(new EstudanteDTO(estudante.get()));
+			EstudanteDTO estudanteDTO = new EstudanteDTO(estudante.get());
+			List<Optional<Matricula>> matriculasOptional = matriculaRepository
+					.findByEstudanteId(estudante.get().getId());
+			if (!matriculasOptional.isEmpty()) {
+				List<Matricula> matriculas = new ArrayList<Matricula>();
+				matriculasOptional.forEach(mo -> matriculas.add(mo.get()));
+				List<MatriculaDTO> dtos = MatriculaDTO.converter(matriculas);
+				estudanteDTO.setMatriculas(dtos);
+			}
+			return ResponseEntity.ok(estudanteDTO);
 		}
 		return ResponseEntity.notFound().build();
 	}

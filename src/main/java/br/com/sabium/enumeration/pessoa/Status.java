@@ -2,25 +2,26 @@ package br.com.sabium.enumeration.pessoa;
 
 import br.com.sabium.controller.exception.GraduacaoDontExistException;
 
-public enum Graduacao {
+public enum Status {
 
-	GRADUACAO("Graduacao"), MESTRE("Mestre"), DOUTORADO("Doutor(a)"), PHD("PHD");
-
+	PENDENTE("Pendente"), APROVADA("Aprovada"), CANCELADA("Cancelada");
+	
 	private final String descricao;
 
-	private Graduacao(String graduacao) {
-		this.descricao = graduacao;
+	private Status(String status) {
+		this.descricao = status;
 	}
 
 	public String getDescricao() {
 		return descricao;
 	}
 
-	public static Graduacao converte(String graduacao) {
+	public static Status converte(String status) {
     	try {
-    		return Graduacao.valueOf(graduacao.toUpperCase());
+    		return Status.valueOf(status.toUpperCase());
     	}catch (Exception e) {
     		throw new GraduacaoDontExistException();
     	}
 	}
+	
 }

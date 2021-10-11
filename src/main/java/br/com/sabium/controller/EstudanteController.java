@@ -24,6 +24,7 @@ import br.com.sabium.controller.dto.DisciplinaDTO;
 import br.com.sabium.controller.dto.EstudanteDTO;
 import br.com.sabium.controller.dto.EstudanteDisciplinaDTO;
 import br.com.sabium.controller.form.EstudanteForm;
+import br.com.sabium.enumeration.pessoa.Turno;
 import br.com.sabium.model.administrativo.Disciplina;
 import br.com.sabium.model.administrativo.Matricula;
 import br.com.sabium.model.pessoa.Estudante;
@@ -76,6 +77,15 @@ public class EstudanteController {
 			return ResponseEntity.ok(estudanteDisciplinaDTO);
 		}
 		return ResponseEntity.notFound().build();
+	}
+	
+	@GetMapping("/turno/{turno}")
+	public List<EstudanteDTO> listByTurno(@PathVariable String turno) {
+		List<Estudante> estudantes = estudanteRepository.findByTurno(Turno.converte(turno));
+		if (estudantes != null) {
+			return EstudanteDTO.converter(estudantes);
+		}
+		return EstudanteDTO.converter(estudanteRepository.findAll());
 	}
 
 	@PutMapping("/{id}")

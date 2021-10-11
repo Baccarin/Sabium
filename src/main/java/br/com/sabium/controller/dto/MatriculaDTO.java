@@ -10,11 +10,13 @@ public class MatriculaDTO {
 	private Long idMatricula;
 	private EstudanteDTO estudante;
 	private DisciplinaDTO disciplina;
+	private String status;
 
 	public MatriculaDTO(Matricula matricula) {
 		this.idMatricula = matricula.getId();
 		this.estudante = new EstudanteDTO(matricula.getEstudante());
 		this.disciplina = new DisciplinaDTO(matricula.getDisciplina());
+		this.status = matricula.getStatus().getDescricao();
 	}
 
 	public Long getIdMatricula() {
@@ -39,6 +41,14 @@ public class MatriculaDTO {
 
 	public void setDisciplina(DisciplinaDTO disciplina) {
 		this.disciplina = disciplina;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	public static List<MatriculaDTO> converter(List<Matricula> matriculas) {

@@ -36,9 +36,6 @@ public class DisciplinaController {
 	@Autowired
 	private DisciplinaRepository disciplinaRepository;
 
-//	@Autowired
-//	private MatriculaRepository matriculaRepository;
-
 	@GetMapping
 	public List<DisciplinaDTO> lista(String nomeDisciplina) {
 		List<Disciplina> disciplinas = new ArrayList<>();
@@ -65,12 +62,7 @@ public class DisciplinaController {
 	public ResponseEntity<DisciplinaDTO> detalhesMatriculas(@PathVariable Long id) {
 		Optional<Disciplina> disciplina = disciplinaRepository.findById(id);
 		if (disciplina != null) {
-			DisciplinaDTO discipliaDTO = new DisciplinaDTO(disciplina.get());
-//			List<Matricula> matriculas = matriculaRepository.findByDisciplinaId(discipliaDTO.getId());
-//			if (!matriculas.isEmpty()) {
-//				discipliaDTO.setMatriculas(MatriculaDTO.converter(matriculas));
-//			}
-			return ResponseEntity.ok(discipliaDTO);
+			return ResponseEntity.ok(new DisciplinaDTO(disciplina.get()));
 		}
 		return ResponseEntity.notFound().build();
 	}
@@ -80,8 +72,7 @@ public class DisciplinaController {
 	public ResponseEntity<DisciplinaDTO> atualizar(@PathVariable Long id, @RequestBody @Valid DisciplinaForm form) {
 		Optional<Disciplina> optional = disciplinaRepository.findById(id);
 		if (optional.isPresent()) {
-			Disciplina disciplina = form.atualizar(id, disciplinaRepository);
-			return ResponseEntity.ok(new DisciplinaDTO(disciplina));
+			return ResponseEntity.ok(new DisciplinaDTO(form.atualizar(id, disciplinaRepository)));
 		}
 
 		return ResponseEntity.notFound().build();

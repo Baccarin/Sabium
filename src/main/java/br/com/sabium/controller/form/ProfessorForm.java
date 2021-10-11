@@ -5,7 +5,7 @@ import java.util.Optional;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import br.com.sabium.controller.exception.EstudanteAlreadyExistException;
+import br.com.sabium.controller.exception.ProfessorAlreadyExistException;
 import br.com.sabium.enumeration.pessoa.Graduacao;
 import br.com.sabium.model.pessoa.Professor;
 import br.com.sabium.repository.ProfessorRepository;
@@ -23,9 +23,9 @@ public class ProfessorForm {
 	@NotNull
 	@NotEmpty
 	private String sexo;
-	
+
 	private Double salario;
-	
+
 	private String graduacao;
 
 	public String getNome() {
@@ -67,11 +67,11 @@ public class ProfessorForm {
 	public void setGraduacao(String graduacao) {
 		this.graduacao = graduacao;
 	}
-	
+
 	public Professor converter(ProfessorRepository professorRepository) {
-		Professor professor = professorRepository.findByNome(nome);
+		Professor professor = professorRepository.findByCpf(cpf);
 		if (professor != null) {
-			throw new EstudanteAlreadyExistException();
+			throw new ProfessorAlreadyExistException();
 		}
 		return new Professor(nome, cpf, sexo, salario, Graduacao.converte(graduacao));
 	}

@@ -40,7 +40,7 @@ public class CursoController {
 	@Autowired
 	private DisciplinaRepository disciplinaRepository;
 
-	@GetMapping
+	@GetMapping("/simplificado")
 	public List<CursoDTO> lista(String nomeCurso) {
 		List<Curso> cursos = new ArrayList<>();
 		if (nomeCurso == null) {
@@ -61,7 +61,7 @@ public class CursoController {
 		return ResponseEntity.created(uri).body(new CursoDTO(curso));
 	}
 
-	@GetMapping("/{id}")
+	@GetMapping("/detalhado/{id}")
 	public ResponseEntity<CursoDisciplinaDTO> detalhar(@PathVariable Long id) {
 		Optional<Curso> curso = cursoRepository.findById(id);
 		if (curso != null) {
@@ -72,6 +72,19 @@ public class CursoController {
 				cursoDisciplinaDTO.setDisciplinas(dtos);
 			}
 			return ResponseEntity.ok(cursoDisciplinaDTO);
+		}
+		return ResponseEntity.notFound().build();
+	}
+	
+	@GetMapping("/detalhado/todos")
+	public ResponseEntity<List<CursoDisciplinaDTO>> detalharTodo() {
+		List<Curso> cursos = cursoRepository.findAll();
+		List<CursoDisciplinaDTO> cursoDisciplinaDTOs = new ArrayList<>();
+		if (!cursos.isEmpty()) {
+			cursos.forEach( c -> {
+				cursoDisciplinaDTOs.add(CursoDisciplinaDTO.converter(c, disciplinaRepository));
+			});
+			return ResponseEntity.ok(cursoDisciplinaDTOs);
 		}
 		return ResponseEntity.notFound().build();
 	}
@@ -98,6 +111,17 @@ public class CursoController {
 				return ResponseEntity.ok().build();
 			}
 			throw new CursoWithDisciplinasAssociateException();
+		}
+		return ResponseEntity.notFound().build();
+	}
+	
+	@DeleteMapping("/todos")
+	@Transactional
+	public ResponseEntity<?> removerTodos() {
+		List<Curso> lista = cursoRepository.findAll();
+		if (!lista.isEmpty()) {
+			cursoRepository.deleteAll();
+			return ResponseEntity.ok().build();
 		}
 		return ResponseEntity.notFound().build();
 	}

@@ -1,4 +1,4 @@
-package br.com.sabium.model.administrativo;
+package br.com.sabium.enumeration.pessoa;
 
 import br.com.sabium.controller.exception.TurnoDontExistException;
 

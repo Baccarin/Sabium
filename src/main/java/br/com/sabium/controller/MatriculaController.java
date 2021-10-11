@@ -61,7 +61,7 @@ public class MatriculaController {
 		return ResponseEntity.created(uri).body(new MatriculaDTO(matricula));
 	}
 
-	@GetMapping("/{id}")
+	@GetMapping("/detalhado/{id}")
 	public ResponseEntity<MatriculaDTO> detalhar(@PathVariable Long id) {
 		Optional<Matricula> matricula = matriculaRepository.findById(id);
 		if (matricula != null) {
@@ -76,6 +76,17 @@ public class MatriculaController {
 		Optional<Matricula> optional = matriculaRepository.findById(id);
 		if (optional.isPresent()) {
 			matriculaRepository.deleteById(id);
+			return ResponseEntity.ok().build();
+		}
+		return ResponseEntity.notFound().build();
+	}
+	
+	@DeleteMapping("/todos")
+	@Transactional
+	public ResponseEntity<?> removerTodos() {
+		List<Matricula> lista = matriculaRepository.findAll();
+		if (!lista.isEmpty()) {
+			matriculaRepository.deleteAll();
 			return ResponseEntity.ok().build();
 		}
 		return ResponseEntity.notFound().build();

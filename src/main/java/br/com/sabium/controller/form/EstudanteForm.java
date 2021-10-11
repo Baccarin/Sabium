@@ -6,7 +6,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import br.com.sabium.controller.exception.EstudanteAlreadyExistException;
-import br.com.sabium.model.administrativo.Turno;
+import br.com.sabium.enumeration.pessoa.Turno;
 import br.com.sabium.model.pessoa.Estudante;
 import br.com.sabium.repository.EstudanteRepository;
 
@@ -66,7 +66,7 @@ public class EstudanteForm {
 	}
 	
 	public Estudante converter(EstudanteRepository estudanteRepository) {
-		Estudante estudante = estudanteRepository.findByNome(nome);
+		Estudante estudante = estudanteRepository.findByCpf(cpf);
 		if (estudante != null) {
 			throw new EstudanteAlreadyExistException();
 		}

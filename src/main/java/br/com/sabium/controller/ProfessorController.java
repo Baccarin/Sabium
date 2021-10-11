@@ -22,6 +22,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import br.com.sabium.controller.dto.ProfessorDTO;
 import br.com.sabium.controller.form.ProfessorForm;
+import br.com.sabium.enumeration.pessoa.Graduacao;
 import br.com.sabium.model.pessoa.Professor;
 import br.com.sabium.repository.ProfessorRepository;
 
@@ -62,6 +63,15 @@ public class ProfessorController {
 		}
 		return ResponseEntity.notFound().build();
 	}
+	
+	@GetMapping("/graduacao/{graduacao}")
+	public List<ProfessorDTO> listByGraduacao(@PathVariable String graduacao) {
+		List<Professor> professores = professorRepository.findByGraduacao(Graduacao.converte(graduacao));
+		if (professores != null) {
+			return ProfessorDTO.converter(professores);
+		}
+		return ProfessorDTO.converter(professorRepository.findAll());
+	}
 
 	@PutMapping("/{id}")
 	@Transactional
@@ -81,6 +91,17 @@ public class ProfessorController {
 		Optional<Professor> optional = professorRepository.findById(id);
 		if (optional.isPresent()) {
 			professorRepository.deleteById(id);
+			return ResponseEntity.ok().build();
+		}
+		return ResponseEntity.notFound().build();
+	}
+	
+	@DeleteMapping("/todos")
+	@Transactional
+	public ResponseEntity<?> removerTodos() {
+		List<Professor> professores = professorRepository.findAll();
+		if (!professores.isEmpty()) {
+			professorRepository.deleteAll();
 			return ResponseEntity.ok().build();
 		}
 		return ResponseEntity.notFound().build();

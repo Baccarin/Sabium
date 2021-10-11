@@ -9,6 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
+import br.com.sabium.enumeration.pessoa.Status;
 import br.com.sabium.model.pessoa.Estudante;
 
 @Entity
@@ -26,6 +27,8 @@ public class Matricula {
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "disciplina_id", nullable = false)
 	private Disciplina disciplina;
+	
+	private Status status = Status.PENDENTE;
 
 	public Matricula() {
 
@@ -59,6 +62,14 @@ public class Matricula {
 
 	public void setDisciplina(Disciplina disciplina) {
 		this.disciplina = disciplina;
+	}
+
+	public Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 
 }

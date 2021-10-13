@@ -20,13 +20,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import br.com.sabium.controller.dto.CursoSimplificadoDTO;
 import br.com.sabium.controller.dto.CursoDisciplinaDTO;
-import br.com.sabium.controller.dto.DisciplinaDTO;
+import br.com.sabium.controller.dto.CursoSimplificadoDTO;
 import br.com.sabium.controller.exception.CursoWithDisciplinasAssociateException;
 import br.com.sabium.controller.form.CursoForm;
 import br.com.sabium.model.administrativo.Curso;
-import br.com.sabium.model.administrativo.Disciplina;
 import br.com.sabium.repository.CursoRepository;
 import br.com.sabium.repository.DisciplinaRepository;
 
@@ -41,7 +39,7 @@ public class CursoController {
 	private DisciplinaRepository disciplinaRepository;
 
 	private List<Curso> cursos = new ArrayList<>();
-	
+
 	@GetMapping("/simplificado/todos")
 	public ResponseEntity<List<CursoSimplificadoDTO>> listAll() {
 		cursos = cursoRepository.findAll();
@@ -50,28 +48,22 @@ public class CursoController {
 		}
 		return ResponseEntity.notFound().build();
 	}
-	
+
 	@GetMapping("/detalhado/{id}")
-	public ResponseEntity<CursoDisciplinaDTO> detalhar(@PathVariable Long id) {
+	public ResponseEntity<CursoDisciplinaDTO> listByIdDetalhado(@PathVariable Long id) {
 		Optional<Curso> curso = cursoRepository.findById(id);
 		if (curso != null) {
-			CursoDisciplinaDTO cursoDisciplinaDTO = new CursoDisciplinaDTO(curso.get());
-			List<Disciplina> disciplinas = disciplinaRepository.findByCursoId(curso.get().getId());
-			if (!disciplinas.isEmpty()) {
-				List<DisciplinaDTO> dtos = DisciplinaDTO.converter(disciplinas);
-				cursoDisciplinaDTO.setDisciplinas(dtos);
-			}
-			return ResponseEntity.ok(cursoDisciplinaDTO);
+			return ResponseEntity.ok(CursoDisciplinaDTO.converter(curso.get(), disciplinaRepository));
 		}
 		return ResponseEntity.notFound().build();
 	}
-	
+
 	@GetMapping("/detalhado/todos")
-	public ResponseEntity<List<CursoDisciplinaDTO>> detalharTodo() {
+	public ResponseEntity<List<CursoDisciplinaDTO>> listAllDetalhado() {
 		List<Curso> cursos = cursoRepository.findAll();
 		List<CursoDisciplinaDTO> cursoDisciplinaDTOs = new ArrayList<>();
 		if (!cursos.isEmpty()) {
-			cursos.forEach( c -> {
+			cursos.forEach(c -> {
 				cursoDisciplinaDTOs.add(CursoDisciplinaDTO.converter(c, disciplinaRepository));
 			});
 			return ResponseEntity.ok(cursoDisciplinaDTOs);
@@ -81,11 +73,12 @@ public class CursoController {
 
 	@PostMapping
 	@Transactional
-	public ResponseEntity<CursoSimplificadoDTO> cadastrar(@RequestBody @Valid CursoForm form, UriComponentsBuilder uriBuilder) {
+	public ResponseEntity<CursoSimplificadoDTO> cadastrar(@RequestBody @Valid CursoForm form,
+			UriComponentsBuilder uriBuilder) {
 		Curso curso = form.converter(cursoRepository);
 		cursoRepository.save(curso);
 
-		URI uri = uriBuilder.path("/cursos/{id}").buildAndExpand(curso.getId()).toUri();
+		URI uri = uriBuilder.path("/detalhado/{id}").buildAndExpand(curso.getId()).toUri();
 		return ResponseEntity.created(uri).body(new CursoSimplificadoDTO(curso));
 	}
 
@@ -114,7 +107,7 @@ public class CursoController {
 		}
 		return ResponseEntity.notFound().build();
 	}
-	
+
 	@DeleteMapping("/todos")
 	@Transactional
 	public ResponseEntity<?> removerTodos() {

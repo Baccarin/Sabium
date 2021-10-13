@@ -45,6 +45,15 @@ public class EstudanteController {
 		return ResponseEntity.notFound().build();
 	}
 
+	@GetMapping("/simplificado/{id}")
+	public ResponseEntity<EstudanteSimplificadoDTO> findByIdSimplificado(@PathVariable Long id) {
+		Optional<Estudante> estudante = estudanteRepository.findById(id);
+		if (estudante != null) {
+			return ResponseEntity.ok(new EstudanteSimplificadoDTO(estudante.get()));
+		}
+		return ResponseEntity.notFound().build();
+	}
+
 	@GetMapping("/detalhado/todos")
 	public ResponseEntity<List<EstudanteDetalhadoDTO>> findAllDetalhado() {
 		estudantes = estudanteRepository.findAll();
@@ -52,12 +61,12 @@ public class EstudanteController {
 			List<EstudanteDetalhadoDTO> listaDTO = new ArrayList<>();
 			for (Estudante estudante : estudantes) {
 				listaDTO.add(new EstudanteDetalhadoDTO(estudante));
-			}			
+			}
 			return ResponseEntity.ok(listaDTO);
 		}
 		return ResponseEntity.notFound().build();
 	}
-	
+
 	@GetMapping("/detalhado/{id}")
 	public ResponseEntity<EstudanteSimplificadoDTO> findByIdDetalhado(@PathVariable Long id) {
 		Optional<Estudante> estudante = estudanteRepository.findById(id);

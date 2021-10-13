@@ -33,17 +33,35 @@ public class ProfessorController {
 	@Autowired
 	private ProfessorRepository professorRepository;
 
-	@GetMapping
-	public List<ProfessorDTO> lista(String nomePessoa) {
-		List<Professor> professores = new ArrayList<>();
-		if (nomePessoa == null || nomePessoa.isEmpty()) {
-			professores = professorRepository.findAll();
-			return ProfessorDTO.converter(professores);
+	private List<Professor> professores = new ArrayList<>();
+
+	@GetMapping("/todos")
+	public ResponseEntity<List<ProfessorDTO>> listAll() {
+		professores = professorRepository.findAll();
+		if (!professores.isEmpty()) {
+			return ResponseEntity.ok(ProfessorDTO.converter(professores));
 		}
-		professores.add(professorRepository.findByNome(nomePessoa));
-		return ProfessorDTO.converter(professores);
+		return ResponseEntity.notFound().build();
+	}
+	
+	@GetMapping("/{id}")
+	public ResponseEntity<ProfessorDTO> detalhar(@PathVariable Long id) {
+		Optional<Professor> professor = professorRepository.findById(id);
+		if (professor != null) {
+			return ResponseEntity.ok(new ProfessorDTO(professor.get()));
+		}
+		return ResponseEntity.notFound().build();
 	}
 
+	@GetMapping("/graduacao/{graduacao}")
+	public List<ProfessorDTO> listByGraduacao(@PathVariable String graduacao) {
+		List<Professor> professores = professorRepository.findByGraduacao(Graduacao.converte(graduacao));
+		if (professores != null) {
+			return ProfessorDTO.converter(professores);
+		}
+		return ProfessorDTO.converter(professorRepository.findAll());
+	}
+	
 	@PostMapping
 	@Transactional
 	public ResponseEntity<ProfessorDTO> cadastrar(@RequestBody @Valid ProfessorForm form,
@@ -55,23 +73,6 @@ public class ProfessorController {
 		return ResponseEntity.created(uri).body(new ProfessorDTO(professor));
 	}
 
-	@GetMapping("/{id}")
-	public ResponseEntity<ProfessorDTO> detalhar(@PathVariable Long id) {
-		Optional<Professor> professor = professorRepository.findById(id);
-		if (professor != null) {
-			return ResponseEntity.ok(new ProfessorDTO(professor.get()));
-		}
-		return ResponseEntity.notFound().build();
-	}
-	
-	@GetMapping("/graduacao/{graduacao}")
-	public List<ProfessorDTO> listByGraduacao(@PathVariable String graduacao) {
-		List<Professor> professores = professorRepository.findByGraduacao(Graduacao.converte(graduacao));
-		if (professores != null) {
-			return ProfessorDTO.converter(professores);
-		}
-		return ProfessorDTO.converter(professorRepository.findAll());
-	}
 
 	@PutMapping("/{id}")
 	@Transactional

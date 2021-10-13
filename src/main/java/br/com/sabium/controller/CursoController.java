@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import br.com.sabium.controller.dto.CursoDTO;
+import br.com.sabium.controller.dto.CursoSimplificadoDTO;
 import br.com.sabium.controller.dto.CursoDisciplinaDTO;
 import br.com.sabium.controller.dto.DisciplinaDTO;
 import br.com.sabium.controller.exception.CursoWithDisciplinasAssociateException;
@@ -40,27 +40,17 @@ public class CursoController {
 	@Autowired
 	private DisciplinaRepository disciplinaRepository;
 
-	@GetMapping("/simplificado")
-	public List<CursoDTO> lista(String nomeCurso) {
-		List<Curso> cursos = new ArrayList<>();
-		if (nomeCurso == null) {
-			cursos = cursoRepository.findAll();
-		} else {
-			cursos.add(cursoRepository.findByNome(nomeCurso));
+	private List<Curso> cursos = new ArrayList<>();
+	
+	@GetMapping("/simplificado/todos")
+	public ResponseEntity<List<CursoSimplificadoDTO>> listAll() {
+		cursos = cursoRepository.findAll();
+		if (!cursos.isEmpty()) {
+			return ResponseEntity.ok(CursoSimplificadoDTO.converter(cursos));
 		}
-		return CursoDTO.converter(cursos);
+		return ResponseEntity.notFound().build();
 	}
-
-	@PostMapping
-	@Transactional
-	public ResponseEntity<CursoDTO> cadastrar(@RequestBody @Valid CursoForm form, UriComponentsBuilder uriBuilder) {
-		Curso curso = form.converter(cursoRepository);
-		cursoRepository.save(curso);
-
-		URI uri = uriBuilder.path("/cursos/{id}").buildAndExpand(curso.getId()).toUri();
-		return ResponseEntity.created(uri).body(new CursoDTO(curso));
-	}
-
+	
 	@GetMapping("/detalhado/{id}")
 	public ResponseEntity<CursoDisciplinaDTO> detalhar(@PathVariable Long id) {
 		Optional<Curso> curso = cursoRepository.findById(id);
@@ -89,13 +79,23 @@ public class CursoController {
 		return ResponseEntity.notFound().build();
 	}
 
+	@PostMapping
+	@Transactional
+	public ResponseEntity<CursoSimplificadoDTO> cadastrar(@RequestBody @Valid CursoForm form, UriComponentsBuilder uriBuilder) {
+		Curso curso = form.converter(cursoRepository);
+		cursoRepository.save(curso);
+
+		URI uri = uriBuilder.path("/cursos/{id}").buildAndExpand(curso.getId()).toUri();
+		return ResponseEntity.created(uri).body(new CursoSimplificadoDTO(curso));
+	}
+
 	@PutMapping("/{id}")
 	@Transactional
-	public ResponseEntity<CursoDTO> atualizar(@PathVariable Long id, @RequestBody @Valid CursoForm form) {
+	public ResponseEntity<CursoSimplificadoDTO> atualizar(@PathVariable Long id, @RequestBody @Valid CursoForm form) {
 		Optional<Curso> optional = cursoRepository.findById(id);
 		if (optional.isPresent()) {
 			Curso curso = form.atualizar(id, cursoRepository);
-			return ResponseEntity.ok(new CursoDTO(curso));
+			return ResponseEntity.ok(new CursoSimplificadoDTO(curso));
 		}
 
 		return ResponseEntity.notFound().build();

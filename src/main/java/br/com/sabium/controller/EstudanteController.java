@@ -20,15 +20,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import br.com.sabium.controller.dto.DisciplinaDTO;
-import br.com.sabium.controller.dto.EstudanteDTO;
-import br.com.sabium.controller.dto.EstudanteDisciplinaDTO;
+import br.com.sabium.controller.dto.EstudanteDetalhadoDTO;
+import br.com.sabium.controller.dto.EstudanteSimplificadoDTO;
 import br.com.sabium.controller.form.EstudanteForm;
 import br.com.sabium.enumeration.pessoa.Turno;
-import br.com.sabium.model.administrativo.Disciplina;
-import br.com.sabium.model.administrativo.Matricula;
 import br.com.sabium.model.pessoa.Estudante;
-import br.com.sabium.repository.DisciplinaRepository;
 import br.com.sabium.repository.EstudanteRepository;
 
 @RestController
@@ -38,63 +34,68 @@ public class EstudanteController {
 	@Autowired
 	private EstudanteRepository estudanteRepository;
 
-	@Autowired
-	private DisciplinaRepository disciplinaRepository;
+	private List<Estudante> estudantes = new ArrayList<>();
 
-	@GetMapping
-	public List<EstudanteDTO> lista(String nomePessoa) {
-		List<Estudante> estudantes = new ArrayList<>();
-		if (nomePessoa == null) {
-			estudantes = estudanteRepository.findAll();
-			return EstudanteDTO.converter(estudantes);
+	@GetMapping("/simplificado/todos")
+	public ResponseEntity<List<EstudanteSimplificadoDTO>> listAll() {
+		estudantes = estudanteRepository.findAll();
+		if (!estudantes.isEmpty()) {
+			return ResponseEntity.ok(EstudanteSimplificadoDTO.converter(estudantes));
 		}
-		estudantes.add(estudanteRepository.findByNome(nomePessoa));
-		return EstudanteDTO.converter(estudantes);
+		return ResponseEntity.notFound().build();
+	}
+
+	@GetMapping("/detalhado/todos")
+	public ResponseEntity<List<EstudanteDetalhadoDTO>> findAllDetalhado() {
+		estudantes = estudanteRepository.findAll();
+		if (!estudantes.isEmpty()) {
+			List<EstudanteDetalhadoDTO> listaDTO = new ArrayList<>();
+			for (Estudante estudante : estudantes) {
+				listaDTO.add(new EstudanteDetalhadoDTO(estudante));
+			}			
+			return ResponseEntity.ok(listaDTO);
+		}
+		return ResponseEntity.notFound().build();
+	}
+	
+	@GetMapping("/detalhado/{id}")
+	public ResponseEntity<EstudanteSimplificadoDTO> findByIdDetalhado(@PathVariable Long id) {
+		Optional<Estudante> estudante = estudanteRepository.findById(id);
+		if (estudante != null) {
+			return ResponseEntity.ok(new EstudanteDetalhadoDTO(estudante.get()));
+		}
+		return ResponseEntity.notFound().build();
+	}
+
+	@GetMapping("/turno/{turno}")
+	public List<EstudanteSimplificadoDTO> listByTurno(@PathVariable String turno) {
+		List<Estudante> estudantes = estudanteRepository.findByTurno(Turno.converte(turno));
+		if (estudantes != null) {
+			return EstudanteSimplificadoDTO.converter(estudantes);
+		}
+		return EstudanteSimplificadoDTO.converter(estudanteRepository.findAll());
 	}
 
 	@PostMapping
 	@Transactional
-	public ResponseEntity<EstudanteDTO> cadastrar(@RequestBody EstudanteForm form, UriComponentsBuilder uriBuilder) {
+	public ResponseEntity<EstudanteSimplificadoDTO> cadastrar(@RequestBody EstudanteForm form,
+			UriComponentsBuilder uriBuilder) {
 
 		Estudante estudante = form.converter(estudanteRepository);
 		estudanteRepository.save(estudante);
 
 		URI uri = uriBuilder.path("/estudantes/{id}").buildAndExpand(estudante.getId()).toUri();
-		return ResponseEntity.created(uri).body(new EstudanteDTO(estudante));
-	}
-
-	@GetMapping("/{id}")
-	public ResponseEntity<EstudanteDTO> detalhesDisciplinasMatriculadas(@PathVariable Long id) {
-		Optional<Estudante> estudante = estudanteRepository.findById(id);
-		if (estudante != null) {
-			EstudanteDisciplinaDTO estudanteDisciplinaDTO = new EstudanteDisciplinaDTO(estudante.get());
-			for (Matricula matricula : estudante.get().getMatriculas()) {
-				List<Disciplina> disciplinas = disciplinaRepository.findByMatricula(matricula.getId());
-				if (disciplinas != null && !disciplinas.isEmpty()) {
-					estudanteDisciplinaDTO.adicionaDisciplinas(DisciplinaDTO.converter(disciplinas));
-				}
-			}
-			return ResponseEntity.ok(estudanteDisciplinaDTO);
-		}
-		return ResponseEntity.notFound().build();
-	}
-	
-	@GetMapping("/turno/{turno}")
-	public List<EstudanteDTO> listByTurno(@PathVariable String turno) {
-		List<Estudante> estudantes = estudanteRepository.findByTurno(Turno.converte(turno));
-		if (estudantes != null) {
-			return EstudanteDTO.converter(estudantes);
-		}
-		return EstudanteDTO.converter(estudanteRepository.findAll());
+		return ResponseEntity.created(uri).body(new EstudanteSimplificadoDTO(estudante));
 	}
 
 	@PutMapping("/{id}")
 	@Transactional
-	public ResponseEntity<EstudanteDTO> atualizar(@PathVariable Long id, @RequestBody @Valid EstudanteForm form) {
+	public ResponseEntity<EstudanteSimplificadoDTO> atualizar(@PathVariable Long id,
+			@RequestBody @Valid EstudanteForm form) {
 		Optional<Estudante> optional = estudanteRepository.findById(id);
 		if (optional.isPresent()) {
 			Estudante estudante = form.atualizar(id, estudanteRepository);
-			return ResponseEntity.ok(new EstudanteDTO(estudante));
+			return ResponseEntity.ok(new EstudanteSimplificadoDTO(estudante));
 		}
 
 		return ResponseEntity.notFound().build();

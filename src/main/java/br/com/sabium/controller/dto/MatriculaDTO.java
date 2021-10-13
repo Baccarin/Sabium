@@ -8,13 +8,13 @@ import br.com.sabium.model.administrativo.Matricula;
 public class MatriculaDTO {
 
 	private Long idMatricula;
-	private EstudanteDTO estudante;
+	private EstudanteSimplificadoDTO estudante;
 	private DisciplinaDTO disciplina;
 	private String status;
 
 	public MatriculaDTO(Matricula matricula) {
 		this.idMatricula = matricula.getId();
-		this.estudante = new EstudanteDTO(matricula.getEstudante());
+		this.estudante = new EstudanteSimplificadoDTO(matricula.getEstudante());
 		this.disciplina = new DisciplinaDTO(matricula.getDisciplina());
 		this.status = matricula.getStatus().getDescricao();
 	}
@@ -27,11 +27,11 @@ public class MatriculaDTO {
 		this.idMatricula = idMatricula;
 	}
 
-	public EstudanteDTO getEstudante() {
+	public EstudanteSimplificadoDTO getEstudante() {
 		return estudante;
 	}
 
-	public void setEstudante(EstudanteDTO estudante) {
+	public void setEstudante(EstudanteSimplificadoDTO estudante) {
 		this.estudante = estudante;
 	}
 

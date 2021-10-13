@@ -5,13 +5,13 @@ import java.util.stream.Collectors;
 
 import br.com.sabium.model.administrativo.Curso;
 
-public class CursoDTO {
+public class CursoSimplificadoDTO {
 
 	private Long id;
 	private String nome;
 
 
-	public CursoDTO(Curso curso) {
+	public CursoSimplificadoDTO(Curso curso) {
 		this.id = curso.getId();
 		this.nome = curso.getNome();
 	}
@@ -32,8 +32,8 @@ public class CursoDTO {
 		this.nome = nome;
 	}
 
-	public static List<CursoDTO> converter(List<Curso> cursos) {
-		return cursos.stream().map(CursoDTO::new).collect(Collectors.toList());
+	public static List<CursoSimplificadoDTO> converter(List<Curso> cursos) {
+		return cursos.stream().map(CursoSimplificadoDTO::new).collect(Collectors.toList());
 	}
 
 }

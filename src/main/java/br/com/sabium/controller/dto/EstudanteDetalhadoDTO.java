@@ -6,13 +6,13 @@ import java.util.stream.Collectors;
 
 import br.com.sabium.model.pessoa.Estudante;
 
-public class EstudanteDisciplinaDTO extends EstudanteDTO {
-
+public class EstudanteDetalhadoDTO extends EstudanteSimplificadoDTO {
 
 	private List<DisciplinaDTO> disciplinas = new ArrayList<>();
 
-	public EstudanteDisciplinaDTO(Estudante estudante) {
+	public EstudanteDetalhadoDTO(Estudante estudante) {
 		super(estudante);
+		estudante.getMatriculas().forEach(m -> this.adicionaDisciplina(new DisciplinaDTO(m.getDisciplina())));
 	}
 
 	public List<DisciplinaDTO> getDisciplinas() {
@@ -22,17 +22,17 @@ public class EstudanteDisciplinaDTO extends EstudanteDTO {
 	public void setDisciplinas(List<DisciplinaDTO> disciplinas) {
 		this.disciplinas = disciplinas;
 	}
-	
+
 	public void adicionaDisciplina(DisciplinaDTO disciplina) {
 		this.disciplinas.add(disciplina);
 	}
-	
+
 	public void adicionaDisciplinas(List<DisciplinaDTO> disciplina) {
 		this.disciplinas.addAll(disciplina);
 	}
 
-	public static List<EstudanteDisciplinaDTO> converterDTO(List<Estudante> estudantes) {
-		return estudantes.stream().map(EstudanteDisciplinaDTO::new).collect(Collectors.toList());
+	public static List<EstudanteDetalhadoDTO> converterDTO(List<Estudante> estudantes) {
+		return estudantes.stream().map(EstudanteDetalhadoDTO::new).collect(Collectors.toList());
 	}
 
 }

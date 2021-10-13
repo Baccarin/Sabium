@@ -5,11 +5,11 @@ import java.util.stream.Collectors;
 
 import br.com.sabium.model.pessoa.Estudante;
 
-public class EstudanteDTO extends PessoaDTO {
+public class EstudanteSimplificadoDTO extends PessoaDTO {
 
 	private String turno;
 
-	public EstudanteDTO(Estudante estudante) {
+	public EstudanteSimplificadoDTO(Estudante estudante) {
 		super(estudante);
 		this.turno = estudante.getTurno().getNomeTurno();
 	}
@@ -22,8 +22,8 @@ public class EstudanteDTO extends PessoaDTO {
 		this.turno = turno;
 	}
 
-	public static List<EstudanteDTO> converter(List<Estudante> estudantes) {
-		return estudantes.stream().map(EstudanteDTO::new).collect(Collectors.toList());
+	public static List<EstudanteSimplificadoDTO> converter(List<Estudante> estudantes) {
+		return estudantes.stream().map(EstudanteSimplificadoDTO::new).collect(Collectors.toList());
 	}
 
 }

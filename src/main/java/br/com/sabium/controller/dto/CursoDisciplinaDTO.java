@@ -6,7 +6,7 @@ import br.com.sabium.model.administrativo.Curso;
 import br.com.sabium.model.administrativo.Disciplina;
 import br.com.sabium.repository.DisciplinaRepository;
 
-public class CursoDisciplinaDTO extends CursoDTO {
+public class CursoDisciplinaDTO extends CursoSimplificadoDTO {
 
 	private List<DisciplinaDTO> disciplinas;
 

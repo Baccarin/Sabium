@@ -36,26 +36,15 @@ public class DisciplinaController {
 	@Autowired
 	private DisciplinaRepository disciplinaRepository;
 
-	@GetMapping
-	public List<DisciplinaDTO> lista(String nomeDisciplina) {
-		List<Disciplina> disciplinas = new ArrayList<>();
-		if (nomeDisciplina == null) {
-			disciplinas = disciplinaRepository.findAll();
-			return DisciplinaDTO.converter(disciplinas);
+	private List<Disciplina> disciplinas = new ArrayList<>();
+
+	@GetMapping("/todos")
+	public ResponseEntity<List<DisciplinaDTO>> listAll() {
+		disciplinas = disciplinaRepository.findAll();
+		if (!disciplinas.isEmpty()) {
+			return ResponseEntity.ok(DisciplinaDTO.converter(disciplinas));
 		}
-		disciplinas.add(disciplinaRepository.findByNome(nomeDisciplina));
-		return DisciplinaDTO.converter(disciplinas);
-	}
-
-	@PostMapping
-	@Transactional
-	public ResponseEntity<DisciplinaDTO> cadastrar(@RequestBody @Valid DisciplinaForm form,
-			UriComponentsBuilder uriBuilder) {
-		Disciplina disciplina = form.converter(disciplinaRepository, cursoRepository);
-		disciplinaRepository.save(disciplina);
-
-		URI uri = uriBuilder.path("/disciplinas/{id}").buildAndExpand(disciplina.getId()).toUri();
-		return ResponseEntity.created(uri).body(new DisciplinaDTO(disciplina));
+		return ResponseEntity.notFound().build();
 	}
 
 	@GetMapping("/{id}")
@@ -65,6 +54,17 @@ public class DisciplinaController {
 			return ResponseEntity.ok(new DisciplinaDTO(disciplina.get()));
 		}
 		return ResponseEntity.notFound().build();
+	}
+	
+	@PostMapping
+	@Transactional
+	public ResponseEntity<DisciplinaDTO> cadastrar(@RequestBody @Valid DisciplinaForm form,
+			UriComponentsBuilder uriBuilder) {
+		Disciplina disciplina = form.converter(disciplinaRepository, cursoRepository);
+		disciplinaRepository.save(disciplina);
+
+		URI uri = uriBuilder.path("/disciplinas/{id}").buildAndExpand(disciplina.getId()).toUri();
+		return ResponseEntity.created(uri).body(new DisciplinaDTO(disciplina));
 	}
 
 	@PutMapping("/{id}")

@@ -1,10 +1,24 @@
 package br.com.sabium.enumeration.pessoa;
 
+import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import br.com.sabium.controller.exception.GraduacaoDontExistException;
 
-public enum Graduacao {
+public enum Graduacao implements Serializable{
 
-	GRADUACAO("Graduacao"), MESTRE("Mestre"), DOUTORADO("Doutor(a)"), PHD("PHD");
+    @JsonProperty("Graduacao")
+	GRADUACAO("Graduacao"),
+	
+    @JsonProperty("Mestre")
+	MESTRE("Mestre"),
+	
+    @JsonProperty("Doutor(a)")
+	DOUTORADO("Doutor(a)"),
+	
+    @JsonProperty("PHD")
+	PHD("PHD");
 
 	private final String descricao;
 

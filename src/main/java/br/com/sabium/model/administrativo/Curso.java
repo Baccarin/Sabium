@@ -1,5 +1,6 @@
 package br.com.sabium.model.administrativo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -14,15 +15,15 @@ public class Curso {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	private String nome;
 	@OneToMany(mappedBy = "curso")
-	private List<Disciplina> disciplinas;
+	private List<Disciplina> disciplinas = new ArrayList<>();
 
 	public Curso() {
-		
+
 	}
-	
+
 	public Curso(String nome) {
 		this.nome = nome;
 	}
@@ -51,5 +52,9 @@ public class Curso {
 		this.disciplinas = disciplinas;
 	}
 
+	@Override
+	public String toString() {
+		return "Curso [id=" + id + ", nome=" + nome + ", disciplinas=" + disciplinas + "]";
+	}
 
 }

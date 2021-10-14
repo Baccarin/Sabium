@@ -1,5 +1,6 @@
 package br.com.sabium.model.pessoa;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -16,7 +17,7 @@ public class Estudante extends Pessoa {
 	private Turno turno;
 
 	@OneToMany(mappedBy = "estudante", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	private List<Matricula> matriculas;
+	private List<Matricula> matriculas = new ArrayList<>();
 
 	public Estudante() {
 

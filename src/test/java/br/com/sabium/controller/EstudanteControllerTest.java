@@ -1,124 +1,175 @@
 package br.com.sabium.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.util.StringUtils;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
 
-import br.com.sabium.repository.CursoRepository;
-import br.com.sabium.repository.DisciplinaRepository;
+import org.junit.Test;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientResponseException;
+import org.springframework.web.client.RestTemplate;
+
+import br.com.sabium.model.administrativo.Curso;
+import br.com.sabium.model.administrativo.Matricula;
+import br.com.sabium.model.pessoa.Estudante;
+import br.com.sabium.repository.MatriculaRepository;
 
 public class EstudanteControllerTest {
 
+	private String URI_LOCAL = "http://localhost:8090/estudantes";
+
+	private RestTemplate restTemplate = new RestTemplate();
+
+	private HttpHeaders headers = new HttpHeaders();
+	
+	private long ID_ESTUDANTE = 67l;
+	
 	@MockBean
-	private CursoRepository cursoRepository;
-
-	@MockBean
-	private DisciplinaRepository disciplinaRepository;
-
-	private WebDriver browser;
-
-	@BeforeAll
-	public void beforeAll() {
-		System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
-	}
-
-	@BeforeEach
-	public void beforeEach() {
-		this.browser = new ChromeDriver();
-	}
-
-	@AfterEach
-	public void afterEach() {
-		this.browser.close();
-	}
-
+	private MatriculaRepository matriculaRepository;
+	
 	@Test
-	public void deveriaAcessarUmDetalhadoId() {
-		System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
-		this.browser = new ChromeDriver();
-		this.browser.navigate().to("http://localhost:8090/estudantes/detalhado/67");
+	public void deveriaRetornar405ParaURIDesconhecida() {
+		try {
+			URI uri = new URI(URI_LOCAL.concat("/indisponivel"));
+			ResponseEntity<Estudante> estudante = restTemplate.getForEntity(uri, Estudante.class);
+			assertFalse(ID_ESTUDANTE == estudante.getBody().getId());
 
-		assertTrue(this.browser.getCurrentUrl().equals("http://localhost:8090/estudantes/detalhado/67"));
-		assertTrue(this.browser.getPageSource().contains("cpf"));
-		assertTrue(this.browser.getPageSource().contains("\"disciplinas\""));
+		} catch (HttpClientErrorException | URISyntaxException ex) {
+			assertEquals(405, ((RestClientResponseException) ex).getRawStatusCode());
+		}
 
-		this.browser.close();
 	}
 	
 	@Test
-	public void deveriaAcessarTodosDetalhadoId() {
-		System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
-		this.browser = new ChromeDriver();
-		this.browser.navigate().to("http://localhost:8090/estudantes/detalhado/67");
+	public void deveriaAcessaEstudantesDetalhadosId() throws URISyntaxException {
+		URI uri = new URI(URI_LOCAL.concat("/detalhado/" + ID_ESTUDANTE));
+		try {
+			ResponseEntity<Estudante> novoEstudante = restTemplate.getForEntity(uri, Estudante.class);
+			assertEquals(ID_ESTUDANTE, novoEstudante.getBody().getId());
+			assertEquals(200, novoEstudante.getStatusCodeValue());
+			
+			List<Matricula> matriculas = matriculaRepository.findByEstudanteId(novoEstudante.getBody().getId());
+			
+			assertTrue(novoEstudante.getBody().getMatriculas().size() > 0);
+			assertTrue(novoEstudante.getBody().getCpf() != null);
 
-		assertTrue(this.browser.getCurrentUrl().equals("http://localhost:8090/estudantes/detalhado/todos"));
-		assertTrue(this.browser.getPageSource().contains("cpf"));
-		assertTrue(this.browser.getPageSource().contains("\"disciplinas\""));
-		
-		// péssimo jeito - seria melhor se conseguisse capturar o json e transformar ele em um objeto
-		int ids = StringUtils.countOccurrencesOf(browser.getPageSource(), "id");
-		assertTrue(ids >= 2);
-		
-		this.browser.close();
-	}
-	
-	@Test
-	public void deveriaAcessarUmSimplificadoId() {
-		System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
-		this.browser = new ChromeDriver();
-		this.browser.navigate().to("http://localhost:8090/estudantes/simplificado/67");
+		} catch (HttpClientErrorException ex) {
+			assertEquals(400, ex.getRawStatusCode());
+			assertEquals(true, ex.getResponseBodyAsString().contains("Missing request header"));
+		}
 
-		// péssimo jeito - seria melhor se conseguisse capturar o json e transformar ele em um objeto
-		int ids = StringUtils.countOccurrencesOf(browser.getPageSource(), "id");
-		
-		assertTrue(this.browser.getCurrentUrl().equals("http://localhost:8090/estudantes/simplificado/67"));
-		
-		assertTrue(ids <= 1);
-		
-		assertTrue(this.browser.getCurrentUrl().equals("http://localhost:8090/estudantes/simplificado/67"));
-		assertTrue(this.browser.getPageSource().contains("67"));
-		assertFalse(this.browser.getPageSource().contains("\"disciplinas\""));
-
-		this.browser.close();
 	}
 
 	@Test
-	public void deveriaRetornar404ParaURIDesconhecida() {
-		System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
-		this.browser = new ChromeDriver();
-		this.browser.navigate().to("http://localhost:8090/estudantes/incompativel");
+	public void deveriaRetornarTodosSimplificados() {
+		try {
+			URI uri = new URI(URI_LOCAL.concat("/simplificado/todos"));
+			ResponseEntity<String> result = restTemplate.getForEntity(uri, String.class);
 
-		
-		
-		assertFalse(this.browser.getCurrentUrl().equals("http://localhost:8090/estudantes"));
-		assertTrue(this.browser.getPageSource().contains("Whitelabel Error Page"));
+			int ids = StringUtils.countOccurrencesOf(result.getBody(), "{\"id\"");
+			assertTrue(ids >= 2);
+			assertEquals(200, result.getStatusCodeValue());
+			assertFalse(result.getBody().contains("disciplinas"));
 
-		this.browser.close();
+		} catch (HttpClientErrorException ex) {
+			assertEquals(400, ex.getRawStatusCode());
+			assertEquals(true, ex.getResponseBodyAsString().contains("Missing request header"));
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Test
-	public void deveriaRetornarMaisDeUSimplificadomResultado() {
-		System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
-		this.browser = new ChromeDriver();
-		this.browser.navigate().to("http://localhost:8090/estudantes/simplificado/todos");
-		
-		// péssimo jeito - seria melhor se conseguisse capturar o json e transformar ele em um objeto
-		int ids = StringUtils.countOccurrencesOf(browser.getPageSource(), "id");
-		
-		assertTrue(this.browser.getCurrentUrl().equals("http://localhost:8090/estudantes/simplificado/todos"));
-		assertTrue(ids >= 2);
-		assertFalse(this.browser.getPageSource().contains("\"disciplinas\""));
-		
-		this.browser.close();
+	public void deveriaRetornarTodosDetalhados() {
+		try {
+			URI uri = new URI(URI_LOCAL.concat("/detalhado/todos"));
+			ResponseEntity<String> result = restTemplate.getForEntity(uri, String.class);
+
+			int ids = StringUtils.countOccurrencesOf(result.getBody(), "{\"id\"");
+			assertTrue(ids >= 2);
+			assertEquals(200, result.getStatusCodeValue());
+			assertTrue(result.getBody().contains("disciplinas"));
+
+		} catch (HttpClientErrorException ex) {
+			assertEquals(400, ex.getRawStatusCode());
+			assertEquals(true, ex.getResponseBodyAsString().contains("Missing request header"));
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+
 	}
 
+	@Test
+	public void deveriaAcessarCursoSimplificadoId() {
+		try {
+			URI uri = new URI(URI_LOCAL.concat("/simplificado/65"));
+			ResponseEntity<Curso> novoCurso = restTemplate.getForEntity(uri, Curso.class);
+			assertEquals(200, novoCurso.getStatusCodeValue());
+			assertTrue(novoCurso.getBody().getDisciplinas().isEmpty());
+			assertTrue(novoCurso.getBody().getId() == 65l);
+
+		} catch (HttpClientErrorException ex) {
+			assertEquals(400, ex.getRawStatusCode());
+			assertEquals(true, ex.getResponseBodyAsString().contains("Missing request header"));
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	@Test
+	public void deveriaCriarNovoCurso() throws URISyntaxException {
+		URI uri = new URI(URI_LOCAL);
+		Curso curso = new Curso("TESTE CURSO");
+		HttpEntity<Curso> request = new HttpEntity<>(curso, headers);
+
+		try {
+			ResponseEntity<Curso> novoCurso = restTemplate.postForEntity(uri, request, Curso.class);
+			assertEquals(curso.getNome(), novoCurso.getBody().getNome());
+			assertEquals(201, novoCurso.getStatusCodeValue());
+			restTemplate.delete(URI_LOCAL + "/" + novoCurso.getBody().getId());
+
+		} catch (HttpClientErrorException ex) {
+			assertEquals(400, ex.getRawStatusCode());
+			assertEquals(true, ex.getResponseBodyAsString().contains("Missing request header"));
+		}
+	}
+
+	@Test
+	public void deveriaAtualizarCurso() throws URISyntaxException {
+		URI uri = new URI(URI_LOCAL);
+		HttpEntity<Curso> request = new HttpEntity<>(new Curso("TESTE PUT CURSO"), headers);
+		ResponseEntity<Curso> cursoPostTeste = restTemplate.postForEntity(uri, request, Curso.class);
+		uri = new URI(URI_LOCAL.concat("/detalhado/" + cursoPostTeste.getBody().getId()));
+		assertEquals("TESTE PUT CURSO", cursoPostTeste.getBody().getNome());
+
+		try {
+			ResponseEntity<Curso> novoCurso = restTemplate.getForEntity(uri, Curso.class);
+			request = new HttpEntity<>(novoCurso.getBody(), headers);
+			novoCurso.getBody().setNome("Teste Put JUnit");
+			uri = new URI(URI_LOCAL + "/" + novoCurso.getBody().getId());
+
+			restTemplate.put(uri, request);
+
+			assertEquals("Teste Put JUnit", novoCurso.getBody().getNome());
+			assertTrue(novoCurso.getBody().getId().equals(cursoPostTeste.getBody().getId()));
+			assertEquals(200, novoCurso.getStatusCodeValue());
+
+			restTemplate.delete(URI_LOCAL + "/" + novoCurso.getBody().getId());
+
+		} catch (HttpClientErrorException ex) {
+			assertEquals(400, ex.getRawStatusCode());
+			assertEquals(true, ex.getResponseBodyAsString().contains("Missing request header"));
+		}
+	}
 
 }

@@ -1,10 +1,17 @@
 package br.com.sabium.enumeration.pessoa;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import br.com.sabium.controller.exception.TurnoDontExistException;
 
 public enum Turno {
     
-    MANHA("Manha"), TARDE("Tarde") , NOITE("Noite");
+    @JsonProperty("Manha")
+    MANHA("Manha"),
+    @JsonProperty("Tarde")
+    TARDE("Tarde") , 
+    @JsonProperty("Noite")
+    NOITE("Noite");
     
     private final String descricao;
 

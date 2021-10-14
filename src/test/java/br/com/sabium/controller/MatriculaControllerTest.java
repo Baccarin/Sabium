@@ -41,27 +41,39 @@ public class MatriculaControllerTest {
 	}
 
 	@Test
-	public void deveriaAcessarEndPointCursosDetalhadosId() {
+	public void deveriaAcessarTodosDetalhados() {
 		System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
 		this.browser = new ChromeDriver();
-		this.browser.navigate().to("http://localhost:8090/matriculas/detalhado/67");
+		this.browser.navigate().to("http://localhost:8090/matriculas/detalhado/todos");
 
-		assertTrue(this.browser.getCurrentUrl().equals("http://localhost:8090/estudantes/detalhado/67"));
-		assertTrue(this.browser.getPageSource().contains("\"nome\":\"Nome Estudante 2\""));
-		assertTrue(this.browser.getPageSource().contains("\"disciplinas\""));
+		assertTrue(this.browser.getCurrentUrl().equals("http://localhost:8090/matriculas/detalhado/todos"));
+		assertTrue(this.browser.getPageSource().contains("estudante"));
+		assertTrue(this.browser.getPageSource().contains("\"idMatricula\""));
+		assertTrue(this.browser.getPageSource().contains("status"));
+
+		// péssimo jeito - seria melhor se conseguisse capturar o json e transformar ele
+		// em um objeto
+		int ids = StringUtils.countOccurrencesOf(browser.getPageSource(), "id");
+		assertTrue(ids >= 3);
 
 		this.browser.close();
 	}
-	
+
 	@Test
-	public void deveriaAcessarEndPointCursosSimplificadoId() {
+	public void deveriaAcessaDetalhadoId() {
 		System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
 		this.browser = new ChromeDriver();
-		this.browser.navigate().to("http://localhost:8090/estudantes/simplificado/67");
+		this.browser.navigate().to("http://localhost:8090/matriculas/detalhado/4852");
 
-		assertTrue(this.browser.getCurrentUrl().equals("http://localhost:8090/estudantes/simplificado/67"));
-		assertTrue(this.browser.getPageSource().contains("\"nome\":\"Nome Estudante 2\""));
-		assertFalse(this.browser.getPageSource().contains("\"disciplinas\""));
+		assertTrue(this.browser.getCurrentUrl().equals("http://localhost:8090/matriculas/detalhado/4852"));
+		assertTrue(this.browser.getPageSource().contains("estudante"));
+		assertTrue(this.browser.getPageSource().contains("\"idMatricula\""));
+		assertTrue(this.browser.getPageSource().contains("status"));
+
+		// péssimo jeito - seria melhor se conseguisse capturar o json e transformar ele
+		// em um objeto
+		int ids = StringUtils.countOccurrencesOf(browser.getPageSource(), "id");
+		assertTrue(ids <= 3);
 
 		this.browser.close();
 	}
@@ -70,26 +82,11 @@ public class MatriculaControllerTest {
 	public void deveriaRetornar404ParaURIDesconhecida() {
 		System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
 		this.browser = new ChromeDriver();
-		this.browser.navigate().to("http://localhost:8090/estudantes/incompativel");
+		this.browser.navigate().to("http://localhost:8090/matriculas/incompativel");
 
-		assertFalse(this.browser.getCurrentUrl().equals("http://localhost:8090/estudantes"));
+		assertFalse(this.browser.getCurrentUrl().equals("http://localhost:8090/matriculas"));
 		assertTrue(this.browser.getPageSource().contains("Whitelabel Error Page"));
 
-		this.browser.close();
-	}
-
-	@Test
-	public void deveriaRetornarMaisDeUmResultado() {
-		System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
-		this.browser = new ChromeDriver();
-		this.browser.navigate().to("http://localhost:8090/estudantes/simplificado/todos");
-		
-		// péssimo jeito - seria melhor se conseguisse capturar o json e transformar ele em um objeto
-		int ids = StringUtils.countOccurrencesOf(browser.getPageSource(), "id");
-		
-		assertTrue(this.browser.getCurrentUrl().equals("http://localhost:8090/estudantes/simplificado/todos"));
-		assertTrue(ids >= 2);
-		
 		this.browser.close();
 	}
 

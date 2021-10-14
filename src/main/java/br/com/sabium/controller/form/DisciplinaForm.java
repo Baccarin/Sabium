@@ -54,7 +54,7 @@ public class DisciplinaForm {
 		Curso curso = cursoRepository.findByNome(nomeCurso);
 		if (curso != null) {
 			Disciplina disciplina = disciplinaRepository.findByNome(nome);
-			if (disciplina.getCurso() == curso) {
+			if (disciplina != null && disciplina.getCurso() == curso) {
 				throw new DisciplinaAlreadyExistsException();
 			}
 			return new Disciplina(nome, Integer.parseInt(duracao), curso);

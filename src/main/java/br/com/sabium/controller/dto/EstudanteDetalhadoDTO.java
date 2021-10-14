@@ -9,9 +9,11 @@ import br.com.sabium.model.pessoa.Estudante;
 public class EstudanteDetalhadoDTO extends EstudanteSimplificadoDTO {
 
 	private List<DisciplinaDTO> disciplinas = new ArrayList<>();
+	private String cpf;
 
 	public EstudanteDetalhadoDTO(Estudante estudante) {
 		super(estudante);
+		this.cpf = estudante.getCpf();
 		estudante.getMatriculas().forEach(m -> this.adicionaDisciplina(new DisciplinaDTO(m.getDisciplina())));
 	}
 
@@ -29,6 +31,14 @@ public class EstudanteDetalhadoDTO extends EstudanteSimplificadoDTO {
 
 	public void adicionaDisciplinas(List<DisciplinaDTO> disciplina) {
 		this.disciplinas.addAll(disciplina);
+	}
+
+	public String getCpf() {
+		return cpf;
+	}
+
+	public void setCpf(String cpf) {
+		this.cpf = cpf;
 	}
 
 	public static List<EstudanteDetalhadoDTO> converterDTO(List<Estudante> estudantes) {

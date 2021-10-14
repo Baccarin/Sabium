@@ -38,7 +38,7 @@ public class DisciplinaController {
 
 	private List<Disciplina> disciplinas = new ArrayList<>();
 
-	@GetMapping("/todos")
+	@GetMapping("/simplificado/todos")
 	public ResponseEntity<List<DisciplinaDTO>> listAll() {
 		disciplinas = disciplinaRepository.findAll();
 		if (!disciplinas.isEmpty()) {
@@ -47,8 +47,8 @@ public class DisciplinaController {
 		return ResponseEntity.notFound().build();
 	}
 
-	@GetMapping("/{id}")
-	public ResponseEntity<DisciplinaDTO> detalhesMatriculas(@PathVariable Long id) {
+	@GetMapping("/simplificado/{id}")
+	public ResponseEntity<DisciplinaDTO> listByIdSimplificado(@PathVariable Long id) {
 		Optional<Disciplina> disciplina = disciplinaRepository.findById(id);
 		if (disciplina != null) {
 			return ResponseEntity.ok(new DisciplinaDTO(disciplina.get()));

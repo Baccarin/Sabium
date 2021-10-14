@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import br.com.sabium.controller.dto.CursoDisciplinaDTO;
+import br.com.sabium.controller.dto.CursoDetalhadoDTO;
 import br.com.sabium.controller.dto.CursoSimplificadoDTO;
 import br.com.sabium.controller.exception.CursoWithDisciplinasAssociateException;
 import br.com.sabium.controller.form.CursoForm;
@@ -49,24 +49,33 @@ public class CursoController {
 		return ResponseEntity.notFound().build();
 	}
 
-	@GetMapping("/detalhado/{id}")
-	public ResponseEntity<CursoDisciplinaDTO> listByIdDetalhado(@PathVariable Long id) {
+	@GetMapping("/simplificado/{id}")
+	public ResponseEntity<CursoSimplificadoDTO> listByIdSimplificado(@PathVariable Long id) {
 		Optional<Curso> curso = cursoRepository.findById(id);
 		if (curso != null) {
-			return ResponseEntity.ok(CursoDisciplinaDTO.converter(curso.get(), disciplinaRepository));
+			return ResponseEntity.ok(new CursoSimplificadoDTO(curso.get()));
 		}
 		return ResponseEntity.notFound().build();
 	}
 
 	@GetMapping("/detalhado/todos")
-	public ResponseEntity<List<CursoDisciplinaDTO>> listAllDetalhado() {
+	public ResponseEntity<List<CursoDetalhadoDTO>> listAllDetalhado() {
 		List<Curso> cursos = cursoRepository.findAll();
-		List<CursoDisciplinaDTO> cursoDisciplinaDTOs = new ArrayList<>();
+		List<CursoDetalhadoDTO> cursoDisciplinaDTOs = new ArrayList<>();
 		if (!cursos.isEmpty()) {
 			cursos.forEach(c -> {
-				cursoDisciplinaDTOs.add(CursoDisciplinaDTO.converter(c, disciplinaRepository));
+				cursoDisciplinaDTOs.add(CursoDetalhadoDTO.converter(c, disciplinaRepository));
 			});
 			return ResponseEntity.ok(cursoDisciplinaDTOs);
+		}
+		return ResponseEntity.notFound().build();
+	}
+
+	@GetMapping("/detalhado/{id}")
+	public ResponseEntity<CursoDetalhadoDTO> listByIdDetalhado(@PathVariable Long id) {
+		Optional<Curso> curso = cursoRepository.findById(id);
+		if (curso != null) {
+			return ResponseEntity.ok(CursoDetalhadoDTO.converter(curso.get(), disciplinaRepository));
 		}
 		return ResponseEntity.notFound().build();
 	}

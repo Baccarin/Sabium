@@ -4,7 +4,7 @@ import br.com.sabium.controller.exception.TurnoDontExistException;
 
 public enum Turno {
     
-    Manha("Manha"), Tarde("Tarde") , Noite("Noite");
+    MANHA("Manha"), TARDE("Tarde") , NOITE("Noite");
     
     private final String descricao;
 
@@ -18,7 +18,7 @@ public enum Turno {
     
     public static Turno converte(String turno) {
     	try {
-    		return Turno.valueOf(turno);
+    		return Turno.valueOf(turno.toUpperCase());
     	}catch (Exception e) {
     		throw new TurnoDontExistException();
     	}

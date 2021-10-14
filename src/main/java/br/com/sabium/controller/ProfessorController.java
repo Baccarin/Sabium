@@ -35,7 +35,7 @@ public class ProfessorController {
 
 	private List<Professor> professores = new ArrayList<>();
 
-	@GetMapping("/todos")
+	@GetMapping("/simplificado/todos")
 	public ResponseEntity<List<ProfessorDTO>> listAll() {
 		professores = professorRepository.findAll();
 		if (!professores.isEmpty()) {
@@ -44,7 +44,7 @@ public class ProfessorController {
 		return ResponseEntity.notFound().build();
 	}
 	
-	@GetMapping("/{id}")
+	@GetMapping("/simplificado/{id}")
 	public ResponseEntity<ProfessorDTO> detalhar(@PathVariable Long id) {
 		Optional<Professor> professor = professorRepository.findById(id);
 		if (professor != null) {

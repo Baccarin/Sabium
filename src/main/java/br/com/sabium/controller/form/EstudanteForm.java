@@ -5,6 +5,7 @@ import java.util.Optional;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import br.com.sabium.controller.exception.CadastroEstudanteInconsistenteException;
 import br.com.sabium.controller.exception.EstudanteAlreadyExistException;
 import br.com.sabium.enumeration.pessoa.Turno;
 import br.com.sabium.model.pessoa.Estudante;
@@ -66,11 +67,14 @@ public class EstudanteForm {
 	}
 	
 	public Estudante converter(EstudanteRepository estudanteRepository) {
-		Estudante estudante = estudanteRepository.findByCpf(cpf);
-		if (estudante != null) {
-			throw new EstudanteAlreadyExistException();
+		if (validaCampos()) {
+			Estudante estudante = estudanteRepository.findByCpf(cpf);
+			if (estudante != null) {
+				throw new EstudanteAlreadyExistException();
+			}
+			return new Estudante(nome, cpf, sexo, Turno.converte(turno));			
 		}
-		return new Estudante(nome, cpf, sexo, Turno.converte(turno));
+		throw new CadastroEstudanteInconsistenteException();
 	}
 
 	public Estudante atualizar(Long id, EstudanteRepository estudanteRepository) {
@@ -80,6 +84,22 @@ public class EstudanteForm {
 		estudante.setCpf(cpf);
 		estudante.setSexo(sexo);
 		return estudante;
+	}
+	
+	public boolean validaCampos() {
+		if(nome == null || nome.equals("")) {
+			return false;
+		}
+		if (cpf == null || cpf.equals("")) {
+			return false;
+		}
+		if(sexo == null || sexo.equals("")) {
+			return false;
+		}
+		if(turno == null || turno.equals("")) {
+			return false;
+		}
+		return true;
 	}
 
 

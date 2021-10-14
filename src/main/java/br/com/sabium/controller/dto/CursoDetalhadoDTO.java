@@ -1,20 +1,21 @@
 package br.com.sabium.controller.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import br.com.sabium.model.administrativo.Curso;
 import br.com.sabium.model.administrativo.Disciplina;
 import br.com.sabium.repository.DisciplinaRepository;
 
-public class CursoDisciplinaDTO extends CursoSimplificadoDTO {
+public class CursoDetalhadoDTO extends CursoSimplificadoDTO {
 
-	private List<DisciplinaDTO> disciplinas;
+	private List<DisciplinaDTO> disciplinas = new ArrayList<>();
 
-	public CursoDisciplinaDTO(Curso curso) {
+	public CursoDetalhadoDTO(Curso curso) {
 		super(curso);
 	}
 
-	public CursoDisciplinaDTO(Curso curso, List<DisciplinaDTO> disciplinas) {
+	public CursoDetalhadoDTO(Curso curso, List<DisciplinaDTO> disciplinas) {
 		super(curso);
 		this.disciplinas = disciplinas;
 	}
@@ -27,8 +28,8 @@ public class CursoDisciplinaDTO extends CursoSimplificadoDTO {
 		this.disciplinas = disciplinas;
 	}
 
-	public static CursoDisciplinaDTO converter(Curso curso, DisciplinaRepository disciplinaRepository) {
-		CursoDisciplinaDTO cursoDisciplinaDTO = new CursoDisciplinaDTO(curso);
+	public static CursoDetalhadoDTO converter(Curso curso, DisciplinaRepository disciplinaRepository) {
+		CursoDetalhadoDTO cursoDisciplinaDTO = new CursoDetalhadoDTO(curso);
 		List<Disciplina> disciplinas = disciplinaRepository.findByCursoId(curso.getId());
 		if (!disciplinas.isEmpty()) {
 			List<DisciplinaDTO> dtos = DisciplinaDTO.converter(disciplinas);

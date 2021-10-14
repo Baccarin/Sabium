@@ -41,15 +41,14 @@ public class DisciplinaControllerTest {
 	}
 
 	@Test
-	public void deveriaAcessarEndPointDisciplinaTodos() {
+	public void deveriaAcessarDisciplinaSimplificadoTodos() {
 		System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
 		this.browser = new ChromeDriver();
-		this.browser.navigate().to("http://localhost:8090/disciplinas/todos");
+		this.browser.navigate().to("http://localhost:8090/disciplinas/simplificado/todos");
 
-		assertTrue(this.browser.getCurrentUrl().equals("http://localhost:8090/disciplinas/todos"));
-		assertTrue(this.browser.getPageSource().contains("\"nome\": \"Nome Disciplina 2\""));
-
-
+		assertTrue(this.browser.getCurrentUrl().equals("http://localhost:8090/disciplinas/simplificado/todos"));
+		assertTrue(this.browser.getPageSource().contains("duracao"));
+		
 		this.browser.close();
 	}
 
@@ -60,22 +59,22 @@ public class DisciplinaControllerTest {
 		this.browser.navigate().to("http://localhost:8090/disciplinas/incompativel");
 
 		assertFalse(this.browser.getCurrentUrl().equals("http://localhost:8090/cursos"));
-		assertTrue(this.browser.getPageSource().contains("type=Not Found"));
+		assertTrue(this.browser.getPageSource().contains("has no explicit mapping for /"));
 
 		this.browser.close();
 	}
 
 	@Test
-	public void deveriaRetornarMaisDeUmResultado() {
+	public void deveriaRetornarDisciplinaId() {
 		System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
 		this.browser = new ChromeDriver();
-		this.browser.navigate().to("http://localhost:8090/cursos/simplificado/todos");
+		this.browser.navigate().to("http://localhost:8090/cursos/simplificado/65");
 		
 		// péssimo jeito - seria melhor se conseguisse capturar o json e transformar ele em um objeto
 		int ids = StringUtils.countOccurrencesOf(browser.getPageSource(), "id");
 		
-		assertTrue(this.browser.getCurrentUrl().equals("http://localhost:8090/cursos/simplificado/todos"));
-		assertTrue(ids > 2);
+		assertTrue(this.browser.getCurrentUrl().equals("http://localhost:8090/cursos/simplificado/65"));
+		assertTrue(ids <= 1);
 		
 		this.browser.close();
 	}

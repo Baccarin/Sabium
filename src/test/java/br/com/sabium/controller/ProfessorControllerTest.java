@@ -7,13 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import org.junit.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientResponseException;
@@ -64,11 +66,13 @@ public class ProfessorControllerTest {
 
 		URI uri = new URI(URI_LOCAL.concat("/simplificado/todos"));
 		try {
-			ResponseEntity<String> result = restTemplate.getForEntity(uri, String.class);
-			int ids = StringUtils.countOccurrencesOf(result.getBody(), "{\"id\"");
-			assertTrue(ids >= 2);
-			assertEquals(200, result.getStatusCodeValue());
-			assertTrue(result.getBody().contains("graduacao"));
+			ResponseEntity<List<Professor>> listaResponse = restTemplate.exchange(uri, HttpMethod.GET, null,
+					new ParameterizedTypeReference<List<Professor>>() {
+					});
+			List<Professor> lista = listaResponse.getBody();
+			assertEquals(200, listaResponse.getStatusCodeValue());
+			assertTrue(lista.size() >= 2);
+			assertTrue(lista.get(0).getGraduacao() != null);
 
 		} catch (HttpClientErrorException ex) {
 			assertEquals(400, ex.getRawStatusCode());

@@ -6,14 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
@@ -62,13 +64,20 @@ public class CursoControllerTest {
 	@Test
 	public void deveriaRetornarTodosSimplificados() {
 		try {
+			boolean vazio = true;
 			URI uri = new URI(URI_LOCAL.concat("/simplificado/todos"));
-			ResponseEntity<String> result = restTemplate.getForEntity(uri, String.class);
+			
+			ResponseEntity<List<Curso>> listaResponse = restTemplate.exchange(uri, HttpMethod.GET, null,
+					new ParameterizedTypeReference<List<Curso>>() {
+					});
+			List<Curso> lista = listaResponse.getBody();
 
-			int ids = StringUtils.countOccurrencesOf(result.getBody(), "{\"id\"");
-			assertTrue(ids >= 2);
-			assertEquals(200, result.getStatusCodeValue());
-			assertFalse(result.getBody().contains("disciplinas"));
+			assertTrue(lista.size() >= 2);
+			assertEquals(200, listaResponse.getStatusCodeValue());
+			for (Curso c : lista) {
+				vazio = c.getDisciplinas().isEmpty();
+			}
+			assertTrue(vazio);
 
 		} catch (HttpClientErrorException ex) {
 			assertEquals(400, ex.getRawStatusCode());
@@ -81,13 +90,21 @@ public class CursoControllerTest {
 	@Test
 	public void deveriaRetornarTodosDetalhados() {
 		try {
+			boolean vazio = true;
 			URI uri = new URI(URI_LOCAL.concat("/detalhado/todos"));
-			ResponseEntity<String> result = restTemplate.getForEntity(uri, String.class);
+			ResponseEntity<List<Curso>> listaResponse = restTemplate.exchange(uri, HttpMethod.GET, null,
+					new ParameterizedTypeReference<List<Curso>>() {
+					});
+			List<Curso> lista = listaResponse.getBody();
 
-			int ids = StringUtils.countOccurrencesOf(result.getBody(), "{\"id\"");
-			assertTrue(ids >= 2);
-			assertEquals(200, result.getStatusCodeValue());
-			assertTrue(result.getBody().contains("disciplinas"));
+			assertTrue(lista.size() >= 2);
+			assertEquals(200, listaResponse.getStatusCodeValue());
+			for (Curso c : lista) {
+				if (vazio) {
+					vazio = c.getDisciplinas().isEmpty();					
+				}
+			}
+			assertTrue(vazio);
 
 		} catch (HttpClientErrorException ex) {
 			assertEquals(400, ex.getRawStatusCode());

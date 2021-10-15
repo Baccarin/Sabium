@@ -7,12 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import org.junit.Test;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientResponseException;
@@ -50,13 +52,11 @@ public class EstudanteControllerTest {
 	public void deveriaAcessaEstudantesDetalhadosId() throws URISyntaxException {
 		URI uri = new URI(URI_LOCAL.concat("/detalhado/" + ID_ESTUDANTE));
 		try {
-			ResponseEntity<String> result = restTemplate.getForEntity(uri, String.class);
-			assertTrue(result.getBody().contains(String.valueOf(ID_ESTUDANTE)));
-
-			int ids = StringUtils.countOccurrencesOf(result.getBody(), "{\"id\"");
-			assertEquals(200, result.getStatusCodeValue());
-			assertTrue(ids >= 2);
-			assertTrue(result.getBody().contains("cpf"));
+			ResponseEntity<Estudante> estudante = restTemplate.getForEntity(uri, Estudante.class);
+			
+			assertTrue(200 == estudante.getStatusCodeValue());
+			assertTrue(estudante.getBody().getId() == ID_ESTUDANTE);
+			assertTrue(estudante.getBody().getCpf() != null );
 
 		} catch (HttpClientErrorException ex) {
 			assertEquals(400, ex.getRawStatusCode());
@@ -69,12 +69,12 @@ public class EstudanteControllerTest {
 	public void deveriaRetornarDetalhadoTodos() {
 		try {
 			URI uri = new URI(URI_LOCAL.concat("/detalhado/todos"));
-			ResponseEntity<String> result = restTemplate.getForEntity(uri, String.class);
-
-			int ids = StringUtils.countOccurrencesOf(result.getBody(), "{\"id\"");
-			assertTrue(ids >= 2);
-			assertEquals(200, result.getStatusCodeValue());
-			assertTrue(result.getBody().contains("disciplinas"));
+			ResponseEntity<List<Estudante>> listaResponse = restTemplate.exchange(uri, HttpMethod.GET, null,
+					new ParameterizedTypeReference<List<Estudante>>() {
+					});
+			List<Estudante> lista = listaResponse.getBody();
+			assertTrue(lista.size() >= 2);
+			assertEquals(200, listaResponse.getStatusCodeValue());
 
 		} catch (HttpClientErrorException ex) {
 			assertEquals(400, ex.getRawStatusCode());
@@ -106,12 +106,14 @@ public class EstudanteControllerTest {
 	public void deveriaRetornarSimplificadosTodos() {
 		try {
 			URI uri = new URI(URI_LOCAL.concat("/simplificado/todos"));
-			ResponseEntity<String> result = restTemplate.getForEntity(uri, String.class);
-
-			int ids = StringUtils.countOccurrencesOf(result.getBody(), "{\"id\"");
-			assertTrue(ids >= 2);
-			assertEquals(200, result.getStatusCodeValue());
-			assertFalse(result.getBody().contains("disciplinas"));
+			
+			ResponseEntity<List<Estudante>> listaResponse = restTemplate.exchange(uri, HttpMethod.GET, null,
+					new ParameterizedTypeReference<List<Estudante>>() {
+					});
+			List<Estudante> lista = listaResponse.getBody();
+		
+			assertTrue(lista.size() >= 2);
+			assertEquals(200, listaResponse.getStatusCodeValue());
 
 		} catch (HttpClientErrorException ex) {
 			assertEquals(400, ex.getRawStatusCode());

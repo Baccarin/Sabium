@@ -50,7 +50,6 @@ public class Estudante extends Pessoa {
 
 	@Override
 	public String toString() {
-
 		return super.toString() + " Turno: " + this.turno;
 	}
 

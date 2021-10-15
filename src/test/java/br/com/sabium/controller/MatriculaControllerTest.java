@@ -6,13 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import org.junit.Test;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
@@ -72,13 +73,15 @@ public class MatriculaControllerTest {
 	public void deveriaRetornarMatriculaTodosDetalhados() {
 		try {
 			URI uri = new URI(URI_LOCAL.concat("/detalhado/todos"));
-			ResponseEntity<String> result = restTemplate.getForEntity(uri, String.class);
+			ResponseEntity<List<Matricula>> listaResponse = restTemplate.exchange(uri, HttpMethod.GET, null,
+					new ParameterizedTypeReference<List<Matricula>>() {
+					});
+			List<Matricula> lista = listaResponse.getBody();
 
-			int ids = StringUtils.countOccurrencesOf(result.getBody(), "{\"id\"");
-			assertTrue(ids >= 3);
-			assertEquals(200, result.getStatusCodeValue());
-			assertTrue(result.getBody().contains("disciplina"));
-			assertTrue(result.getBody().contains("estudante"));
+			assertEquals(200, listaResponse.getStatusCodeValue());
+			assertTrue(lista.size() >= 2);
+			assertTrue(lista.get(0).getEstudante() != null);
+			assertTrue(lista.get(0).getDisciplina() != null);
 
 		} catch (HttpClientErrorException ex) {
 			assertEquals(400, ex.getRawStatusCode());

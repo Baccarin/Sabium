@@ -57,7 +57,9 @@ public abstract class Pessoa {
 		this.id = id;
 	}
 
- 
-
+	@Override
+	public String toString() {
+		return "Pessoa [id=" + id + ", nome=" + nome + ", sexo=" + sexo + "]";
+	}
 
 }

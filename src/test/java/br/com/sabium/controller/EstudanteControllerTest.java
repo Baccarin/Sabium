@@ -2,26 +2,24 @@ package br.com.sabium.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 
 import org.junit.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
-import br.com.sabium.model.administrativo.Curso;
-import br.com.sabium.model.administrativo.Matricula;
+import br.com.sabium.enumeration.pessoa.Turno;
 import br.com.sabium.model.pessoa.Estudante;
-import br.com.sabium.repository.MatriculaRepository;
 
 public class EstudanteControllerTest {
 
@@ -30,12 +28,11 @@ public class EstudanteControllerTest {
 	private RestTemplate restTemplate = new RestTemplate();
 
 	private HttpHeaders headers = new HttpHeaders();
-	
+
 	private long ID_ESTUDANTE = 67l;
-	
-	@MockBean
-	private MatriculaRepository matriculaRepository;
-	
+
+	private String TURNO = "ManhA";
+
 	@Test
 	public void deveriaRetornar405ParaURIDesconhecida() {
 		try {
@@ -48,48 +45,28 @@ public class EstudanteControllerTest {
 		}
 
 	}
-	
+
 	@Test
 	public void deveriaAcessaEstudantesDetalhadosId() throws URISyntaxException {
 		URI uri = new URI(URI_LOCAL.concat("/detalhado/" + ID_ESTUDANTE));
 		try {
-			ResponseEntity<Estudante> novoEstudante = restTemplate.getForEntity(uri, Estudante.class);
-			assertEquals(ID_ESTUDANTE, novoEstudante.getBody().getId());
-			assertEquals(200, novoEstudante.getStatusCodeValue());
-			
-			List<Matricula> matriculas = matriculaRepository.findByEstudanteId(novoEstudante.getBody().getId());
-			
-			assertTrue(novoEstudante.getBody().getMatriculas().size() > 0);
-			assertTrue(novoEstudante.getBody().getCpf() != null);
-
-		} catch (HttpClientErrorException ex) {
-			assertEquals(400, ex.getRawStatusCode());
-			assertEquals(true, ex.getResponseBodyAsString().contains("Missing request header"));
-		}
-
-	}
-
-	@Test
-	public void deveriaRetornarTodosSimplificados() {
-		try {
-			URI uri = new URI(URI_LOCAL.concat("/simplificado/todos"));
 			ResponseEntity<String> result = restTemplate.getForEntity(uri, String.class);
+			assertTrue(result.getBody().contains(String.valueOf(ID_ESTUDANTE)));
 
 			int ids = StringUtils.countOccurrencesOf(result.getBody(), "{\"id\"");
-			assertTrue(ids >= 2);
 			assertEquals(200, result.getStatusCodeValue());
-			assertFalse(result.getBody().contains("disciplinas"));
+			assertTrue(ids >= 2);
+			assertTrue(result.getBody().contains("cpf"));
 
 		} catch (HttpClientErrorException ex) {
 			assertEquals(400, ex.getRawStatusCode());
 			assertEquals(true, ex.getResponseBodyAsString().contains("Missing request header"));
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
 		}
+
 	}
 
 	@Test
-	public void deveriaRetornarTodosDetalhados() {
+	public void deveriaRetornarDetalhadoTodos() {
 		try {
 			URI uri = new URI(URI_LOCAL.concat("/detalhado/todos"));
 			ResponseEntity<String> result = restTemplate.getForEntity(uri, String.class);
@@ -109,13 +86,32 @@ public class EstudanteControllerTest {
 	}
 
 	@Test
-	public void deveriaAcessarCursoSimplificadoId() {
+	public void deveriaRetornarSimplificadoId() {
 		try {
-			URI uri = new URI(URI_LOCAL.concat("/simplificado/65"));
-			ResponseEntity<Curso> novoCurso = restTemplate.getForEntity(uri, Curso.class);
-			assertEquals(200, novoCurso.getStatusCodeValue());
-			assertTrue(novoCurso.getBody().getDisciplinas().isEmpty());
-			assertTrue(novoCurso.getBody().getId() == 65l);
+			URI uri = new URI(URI_LOCAL.concat("/simplificado/" + ID_ESTUDANTE));
+			ResponseEntity<Estudante> estudante = restTemplate.getForEntity(uri, Estudante.class);
+
+			assertEquals(200, estudante.getStatusCodeValue());
+			assertTrue(estudante.getBody().getId() == ID_ESTUDANTE);
+
+		} catch (HttpClientErrorException ex) {
+			assertEquals(400, ex.getRawStatusCode());
+			assertEquals(true, ex.getResponseBodyAsString().contains("Missing request header"));
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void deveriaRetornarSimplificadosTodos() {
+		try {
+			URI uri = new URI(URI_LOCAL.concat("/simplificado/todos"));
+			ResponseEntity<String> result = restTemplate.getForEntity(uri, String.class);
+
+			int ids = StringUtils.countOccurrencesOf(result.getBody(), "{\"id\"");
+			assertTrue(ids >= 2);
+			assertEquals(200, result.getStatusCodeValue());
+			assertFalse(result.getBody().contains("disciplinas"));
 
 		} catch (HttpClientErrorException ex) {
 			assertEquals(400, ex.getRawStatusCode());
@@ -127,16 +123,15 @@ public class EstudanteControllerTest {
 	}
 
 	@Test
-	public void deveriaCriarNovoCurso() throws URISyntaxException {
+	public void deveriaCriarNovoEstudante() throws URISyntaxException {
 		URI uri = new URI(URI_LOCAL);
-		Curso curso = new Curso("TESTE CURSO");
-		HttpEntity<Curso> request = new HttpEntity<>(curso, headers);
-
+		Estudante estudante = new Estudante("Estudante Nome", "Estudante CPF", "Masculino", Turno.NOITE);
+		HttpEntity<Estudante> request = new HttpEntity<>(estudante, headers);
+		ResponseEntity<Estudante> novoEstudante = restTemplate.postForEntity(uri, request, Estudante.class);
 		try {
-			ResponseEntity<Curso> novoCurso = restTemplate.postForEntity(uri, request, Curso.class);
-			assertEquals(curso.getNome(), novoCurso.getBody().getNome());
-			assertEquals(201, novoCurso.getStatusCodeValue());
-			restTemplate.delete(URI_LOCAL + "/" + novoCurso.getBody().getId());
+			assertEquals(estudante.getNome(), novoEstudante.getBody().getNome());
+			assertEquals(201, novoEstudante.getStatusCodeValue());
+			restTemplate.delete(URI_LOCAL + "/" + novoEstudante.getBody().getId());
 
 		} catch (HttpClientErrorException ex) {
 			assertEquals(400, ex.getRawStatusCode());
@@ -145,27 +140,55 @@ public class EstudanteControllerTest {
 	}
 
 	@Test
-	public void deveriaAtualizarCurso() throws URISyntaxException {
+	public void deveriaAtualizarEstudante() throws URISyntaxException {
 		URI uri = new URI(URI_LOCAL);
-		HttpEntity<Curso> request = new HttpEntity<>(new Curso("TESTE PUT CURSO"), headers);
-		ResponseEntity<Curso> cursoPostTeste = restTemplate.postForEntity(uri, request, Curso.class);
-		uri = new URI(URI_LOCAL.concat("/detalhado/" + cursoPostTeste.getBody().getId()));
-		assertEquals("TESTE PUT CURSO", cursoPostTeste.getBody().getNome());
+		Estudante estudante = new Estudante("Estudante Nome", "CPF", "Masculino", Turno.NOITE);
+		HttpEntity<Estudante> request = new HttpEntity<>(estudante, headers);
+		ResponseEntity<Estudante> novoEstudante = restTemplate.postForEntity(uri, request, Estudante.class);
+
+		uri = new URI(URI_LOCAL.concat("/detalhado/" + novoEstudante.getBody().getId()));
+		assertEquals(estudante.getNome(), novoEstudante.getBody().getNome());
+		assertEquals(201, novoEstudante.getStatusCodeValue());
 
 		try {
-			ResponseEntity<Curso> novoCurso = restTemplate.getForEntity(uri, Curso.class);
-			request = new HttpEntity<>(novoCurso.getBody(), headers);
-			novoCurso.getBody().setNome("Teste Put JUnit");
-			uri = new URI(URI_LOCAL + "/" + novoCurso.getBody().getId());
+			ResponseEntity<Estudante> novoEstudantePut = restTemplate.getForEntity(uri, Estudante.class);
 
+			novoEstudantePut.getBody().setNome("Teste Put JUnit");
+			uri = new URI(URI_LOCAL + "/" + novoEstudantePut.getBody().getId());
 			restTemplate.put(uri, request);
 
-			assertEquals("Teste Put JUnit", novoCurso.getBody().getNome());
-			assertTrue(novoCurso.getBody().getId().equals(cursoPostTeste.getBody().getId()));
-			assertEquals(200, novoCurso.getStatusCodeValue());
+			assertEquals("Teste Put JUnit", novoEstudantePut.getBody().getNome());
+			assertTrue(novoEstudantePut.getBody().getId().equals(novoEstudante.getBody().getId()));
+			assertEquals(200, novoEstudantePut.getStatusCodeValue());
 
-			restTemplate.delete(URI_LOCAL + "/" + novoCurso.getBody().getId());
+			restTemplate.delete(URI_LOCAL + "/" + novoEstudante.getBody().getId());
 
+		} catch (HttpClientErrorException ex) {
+			assertEquals(400, ex.getRawStatusCode());
+			assertEquals(true, ex.getResponseBodyAsString().contains("Missing request header"));
+		}
+	}
+
+	@Test
+	public void deveriaRetornarTurnoCorreto() throws URISyntaxException {
+		URI uri = new URI(URI_LOCAL.concat("/turno/" + TURNO));
+		try {
+			ResponseEntity<String> result = restTemplate.getForEntity(uri, String.class);
+
+			assertTrue(result.getBody().contains("turno"));
+			assertEquals(200, result.getStatusCodeValue());
+
+		} catch (HttpClientErrorException ex) {
+			assertEquals(400, ex.getRawStatusCode());
+			assertEquals(true, ex.getResponseBodyAsString().contains("Missing request header"));
+		}
+	}
+
+	@Test
+	public void naoDeveriaRetornarTurnoCorreto() throws URISyntaxException {
+		URI uri = new URI(URI_LOCAL.concat("/turno/naoExiste"));
+		try {
+			assertThrows(HttpServerErrorException.class, () -> restTemplate.getForEntity(uri, String.class));
 		} catch (HttpClientErrorException ex) {
 			assertEquals(400, ex.getRawStatusCode());
 			assertEquals(true, ex.getResponseBodyAsString().contains("Missing request header"));

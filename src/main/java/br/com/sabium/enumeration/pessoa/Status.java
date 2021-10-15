@@ -1,10 +1,19 @@
 package br.com.sabium.enumeration.pessoa;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import br.com.sabium.controller.exception.GraduacaoDontExistException;
 
 public enum Status {
 
-	PENDENTE("Pendente"), APROVADA("Aprovada"), CANCELADA("Cancelada");
+	@JsonProperty("Pendente")
+	PENDENTE("Pendente"), 
+	
+	@JsonProperty("Aprovada")
+	APROVADA("Aprovada"), 
+	
+	@JsonProperty("Cancelada")
+	CANCELADA("Cancelada");
 	
 	private final String descricao;
 

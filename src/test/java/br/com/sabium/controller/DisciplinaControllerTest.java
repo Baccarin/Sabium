@@ -100,17 +100,11 @@ public class DisciplinaControllerTest {
 			assertEquals(disciplina.getNome(), novaDisciplina.getBody().getNome());
 			assertEquals(201, novaDisciplina.getStatusCodeValue());
 
-//			WebTarget target = ClientBuilder.newClient().target(uri);
-//			Response response = target.request(MediaType.APPLICATION_JSON)
-//					.post(Entity.entity(disciplina, MediaType.APPLICATION_JSON));
-//
-//			assertTrue(200 == response.getStatus());
-
 		} catch (HttpClientErrorException ex) {
 			if (idCurso != 0l) {
 				restTemplate.delete("http://localhost:8090/cursos/" + idCurso);
 			}
-//			assertEquals(400, ex.getRawStatusCode());
+			assertEquals(400, ex.getRawStatusCode());
 		}
 	}
 
